@@ -18,16 +18,23 @@ public class Post {
     private String content;
 
     @Column(nullable = false)
-    private Instant createdAt = Instant.now();
+    private Instant createdAt;
 
     @Column(nullable = false)
-    private Instant updatedAt = Instant.now();
+    private Instant updatedAt;
 
     protected Post() {}
 
     public Post(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    @PrePersist
+    void onCreate() {
+        Instant now = Instant.now();
+        this.createdAt = now;
+        this.updatedAt = now;
     }
 
     @PreUpdate
