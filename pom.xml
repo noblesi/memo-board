@@ -28,6 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<jdt.annotation.version>2.4.100</jdt.annotation.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -59,12 +60,17 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-  			<groupId>com.h2database</groupId>
-  			<artifactId>h2</artifactId>
-  			<scope>test</scope>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jdt</groupId>
+			<artifactId>org.eclipse.jdt.annotation</artifactId>
+			<version>${jdt.annotation.version}</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>

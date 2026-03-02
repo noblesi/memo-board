@@ -16,6 +16,7 @@ import com.mskim.memo_api.common.PageRes;
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/posts")
@@ -65,46 +66,50 @@ public class PostController {
     @PostMapping
     public ResponseEntity<PostRes> create(@Valid @RequestBody CreateReq req) {
         Post saved = repo.save(new Post(req.title(), req.content()));
-        return ResponseEntity.created(URI.create("/posts/" + saved.getId()))
-                .body(PostRes.from(saved));
+
+        Long id = Objects.requireNonNull(saved.getId(), "saved.id must not be null after save");
+        URI location = Objects.requireNonNull(URI.create("/posts/" + id));
+
+        return ResponseEntity.created(location).body(PostRes.from(saved));
     }
 
     @GetMapping
-public PageRes<PostSummaryRes> list(
-        @RequestParam(required = false) String q,
-        @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
-) {
-    Page<Post> page = (q == null || q.isBlank())
-            ? repo.findAll(pageable)
-            : repo.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(q, q, pageable);
+    public PageRes<PostSummaryRes> list(
+            @RequestParam(defaultValue = "") String q,
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Pageable p = Objects.requireNonNull(pageable, "pageable must not be null");
 
-    Page<PostSummaryRes> dtoPage = page.map(PostSummaryRes::from);
-    return PageRes.from(dtoPage);
-}
+        Page<Post> page = q.isBlank()
+                ? repo.findAll(p)
+                : repo.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(q, q, p);
+
+        return PageRes.from(page.map(PostSummaryRes::from));
+    }
 
     @GetMapping("/{id}")
-    public PostRes get(@PathVariable Long id) {
+    public PostRes get(@PathVariable long id) {
         Post post = repo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found"));
         return PostRes.from(post);
     }
 
     @PutMapping("/{id}")
-    public PostRes update(@PathVariable Long id, @Valid @RequestBody UpdateReq req) {
+    public PostRes update(@PathVariable long id, @Valid @RequestBody UpdateReq req) {
         Post post = repo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found"));
 
         post.update(req.title(), req.content());
-        Post saved = repo.save(post);
+        Post saved = repo.save(Objects.requireNonNull(post, "post must not be null"));
         return PostRes.from(saved);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        Post post = repo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found"));
-
-        repo.delete(post);
+    public ResponseEntity<Void> delete(@PathVariable long id) {
+        if (!repo.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found");
+        }
+        repo.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }

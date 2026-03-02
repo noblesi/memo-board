@@ -17,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
+@SuppressWarnings("null")
 class PostControllerTest {
 
     @Autowired MockMvc mvc;
