@@ -117,6 +117,25 @@ a:hover {
   align-items: center;
 }
 
+.rowControls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.rowControls > .input,
+.rowControls > .select {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+
+.rowControls > .btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  min-width: 72px;
+}
+
 .stack {
   display: grid;
   gap: 10px;
@@ -167,6 +186,7 @@ a:hover {
   cursor: pointer;
   user-select: none;
   transition: transform 0.05s, background 0.18s, border-color 0.18s;
+  white-space: nowrap;
 }
 
 .btn:hover {

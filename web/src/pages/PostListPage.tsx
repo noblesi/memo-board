@@ -52,10 +52,12 @@ export default function PostListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageParam, qParam]);
 
+  const totalPages = Math.max(1, data?.totalPages ?? 1);
+
   return (
     <div>
       <div className="card cardPad" style={{ marginBottom: 12 }}>
-        <div className="row">
+        <div className="rowControls">
           <input
             className="input"
             value={draftQ}
@@ -120,11 +122,11 @@ export default function PostListPage() {
           이전
         </button>
         <span className="muted">
-          {pageParam + 1} / {data?.totalPages ?? 1}
+          {Math.min(pageParam + 1, totalPages)} / {totalPages}
         </span>
         <button
           className="btn"
-          disabled={data ? pageParam >= data.totalPages - 1 : true}
+          disabled={data ? pageParam >= totalPages - 1 : true}
           onClick={() => setQueryPage(qParam, pageParam + 1)}
         >
           다음
