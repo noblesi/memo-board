@@ -10,21 +10,27 @@ export default function App() {
   const hideNewLink = pathname === "/new" || pathname.endsWith("/edit");
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: 16 }}>
-      <header style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 16 }}>
-        <Link to="/" style={{ fontSize: 20, fontWeight: 700, textDecoration: "none" }}>
-          SimpleBoard
-        </Link>
-        <div style={{ flex: 1 }} />
-        {!hideNewLink && <Link to="/new">새 글</Link>}
-      </header>
+    <div className="appShell">
+      <div className="container">
+        <header className="topbar">
+          <Link to="/" className="brand">
+            SimpleBoard
+          </Link>
+          <div className="spacer" />
+          {!hideNewLink && (
+            <Link to="/new" className="btn btnPrimary">
+              새 글
+            </Link>
+          )}
+        </header>
 
-      <Routes>
-        <Route path="/" element={<PostListPage />} />
-        <Route path="/posts/:id" element={<PostDetailPage />} />
-        <Route path="/new" element={<PostEditPage mode="create" />} />
-        <Route path="/posts/:id/edit" element={<PostEditPage mode="edit" />} />
-      </Routes>
+        <Routes>
+          <Route path="/" element={<PostListPage />} />
+          <Route path="/posts/:id" element={<PostDetailPage />} />
+          <Route path="/new" element={<PostEditPage mode="create" />} />
+          <Route path="/posts/:id/edit" element={<PostEditPage mode="edit" />} />
+        </Routes>
+      </div>
     </div>
   );
 }

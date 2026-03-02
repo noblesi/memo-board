@@ -54,48 +54,59 @@ export default function PostListPage() {
 
   return (
     <div>
-      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-        <input
-          value={draftQ}
-          onChange={(e) => setDraftQ(e.target.value)}
-          placeholder="검색(제목/내용)"
-          style={{ flex: 1, padding: 8 }}
-          onKeyDown={(e) => {
-            if(e.key === "Enter") {
-              setQueryPage(draftQ, 0);
-            }
-          }}
-        />
-        <button onClick={() => setQueryPage(draftQ, 0)}>검색</button>
+      <div className="card cardPad" style={{ marginBottom: 12 }}>
+        <div className="row">
+          <input
+            className="input"
+            value={draftQ}
+            onChange={(e) => setDraftQ(e.target.value)}
+            placeholder="검색(제목/내용)"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") setQueryPage(draftQ, 0);
+            }}
+          />
+          <button className="btn btnPrimary" onClick={() => setQueryPage(draftQ, 0)}>
+            검색
+          </button>
+        </div>
+
+        <div className="row" style={{ marginTop: 10, justifyContent: "space-between" }}>
+          <span className="pill">총 {data?.totalElements ?? 0}개</span>
+          <span className="muted" style={{ fontSize: 12 }}>
+            URL에 검색/페이지가 반영되어 공유/뒤로가기가 자연스럽게 동작합니다.
+          </span>
+        </div>
       </div>
 
-      {err && <div style={{ color: "crimson", marginBottom: 12 }}>{err}</div>}
+      {err && (
+        <div className="error" style={{ marginBottom: 12 }}>
+          {err}
+        </div>
+      )}
 
-      <div style={{ marginBottom: 8 }}>총 {data?.totalElements ?? 0}개</div>
-
-      <div style={{ border: "1px solid #333", borderRadius: 8, overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <div className="tableWrap">
+        <table className="table">
           <thead>
-            <tr style={{ background: "#1a1a1a" }}>
-              <th style={{ textAlign: "left", padding: 10, width: 90 }}>ID</th>
-              <th style={{ textAlign: "left", padding: 10 }}>제목</th>
-              <th style={{ textAlign: "left", padding: 10, width: 220 }}>수정일</th>
+            <tr>
+              <th style={{ width: 90 }}>ID</th>
+              <th>제목</th>
+              <th style={{ width: 220 }}>수정일</th>
             </tr>
           </thead>
           <tbody>
             {(data?.items ?? []).map((p) => (
-              <tr key={p.id} style={{ borderTop: "1px solid #333" }}>
-                <td style={{ padding: 10 }}>{p.id}</td>
-                <td style={{ padding: 10 }}>
+              <tr key={p.id}>
+                <td className="mono">{p.id}</td>
+                <td>
                   <Link to={`/posts/${p.id}`}>{p.title}</Link>
                 </td>
-                <td style={{ padding: 10 }}>{new Date(p.updatedAt).toLocaleString()}</td>
+                <td className="muted">{new Date(p.updatedAt).toLocaleString()}</td>
               </tr>
             ))}
 
             {data && data.items.length === 0 && (
               <tr>
-                <td colSpan={3} style={{ padding: 12, color: "rgba(255,255,255,0.6)" }}>
+                <td colSpan={3} className="muted">
                   게시글이 없습니다.
                 </td>
               </tr>
@@ -104,14 +115,15 @@ export default function PostListPage() {
         </table>
       </div>
 
-      <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 12 }}>
-        <button disabled={pageParam <= 0} onClick={() => setQueryPage(qParam, pageParam - 1)}>
+      <div className="row" style={{ gap: 10, marginTop: 12 }}>
+        <button className="btn" disabled={pageParam <= 0} onClick={() => setQueryPage(qParam, pageParam - 1)}>
           이전
         </button>
-        <div>
+        <span className="muted">
           {pageParam + 1} / {data?.totalPages ?? 1}
-        </div>
+        </span>
         <button
+          className="btn"
           disabled={data ? pageParam >= data.totalPages - 1 : true}
           onClick={() => setQueryPage(qParam, pageParam + 1)}
         >

@@ -95,44 +95,57 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
   }
 
   if (mode === "edit" && !isValidId) {
-    return <div style={{ color: "crimson" }}>잘못된 접근입니다.</div>;
+    return <div className="error">잘못된 접근입니다.</div>;
   }
 
   return (
     <div>
-      <h2 style={{ marginTop: 0 }}>{mode === "create" ? "새 글" : "글 수정"}</h2>
-      {err && <div style={{ color: "crimson", marginBottom: 12 }}>{err}</div>}
+      <h2 className="pageTitle">{mode === "create" ? "새 글" : "글 수정"}</h2>
 
-      <div style={{ display: "grid", gap: 8, maxWidth: 520 }}>
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="제목" />
-
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-          <span style={{ color: ui.titleMsg ? "crimson" : "rgba(255,255,255,0.6)" }}>{ui.titleMsg}</span>
-          <span style={{ color: ui.titleTooLong ? "crimson" : "rgba(255,255,255,0.6)" }}>
-            {title.length}/{TITLE_MAX}
-          </span>
+      {err && (
+        <div className="error" style={{ marginBottom: 12 }}>
+          {err}
         </div>
+      )}
 
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="내용"
-          rows={12}
-          style={{ resize: "vertical" }}
-        />
+      <div className="card cardPad" style={{ maxWidth: 620 }}>
+        <div className="stack">
+          <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="제목" />
 
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-          <span style={{ color: ui.contentMsg ? "crimson" : "rgba(255,255,255,0.6)" }}>{ui.contentMsg}</span>
-          <span style={{ color: ui.contentTooLong ? "crimson" : "rgba(255,255,255,0.6)" }}>
-            {content.length}/{CONTENT_MAX}
-          </span>
-        </div>
+          <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}>
+            <span style={{ color: ui.titleMsg ? "var(--danger)" : "var(--muted)" }}>{ui.titleMsg}</span>
+            <span style={{ color: ui.titleTooLong ? "var(--danger)" : "var(--muted)" }}>
+              {title.length}/{TITLE_MAX}
+            </span>
+          </div>
 
-        <div style={{ display: "flex", gap: 8 }}>
-          <button disabled={!ui.canSubmit} onClick={onSubmit}>
-            {mode === "create" ? "작성" : "저장"}
-          </button>
-          <Link to={mode === "create" ? "/" : `/posts/${postId}`}>취소</Link>
+          <textarea
+            className="textarea"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="내용"
+            rows={12}
+          />
+
+          <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}>
+            <span style={{ color: ui.contentMsg ? "var(--danger)" : "var(--muted)" }}>{ui.contentMsg}</span>
+            <span style={{ color: ui.contentTooLong ? "var(--danger)" : "var(--muted)" }}>
+              {content.length}/{CONTENT_MAX}
+            </span>
+          </div>
+
+          <div className="row" style={{ gap: 10 }}>
+            <button className="btn btnPrimary" disabled={!ui.canSubmit} onClick={onSubmit}>
+              {mode === "create" ? "작성" : "저장"}
+            </button>
+            <Link className="btn btnLink" to={mode === "create" ? "/" : `/posts/${postId}`}>
+              취소
+            </Link>
+            <div className="spacer" />
+            <span className="muted" style={{ fontSize: 12 }}>
+              서버 검증 에러는 필드별로 표시됩니다.
+            </span>
+          </div>
         </div>
       </div>
     </div>

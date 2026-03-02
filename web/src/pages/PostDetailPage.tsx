@@ -27,34 +27,37 @@ export default function PostDetailPage() {
     }
   }
 
-  if (err) return <div style={{ color: "crimson" }}>{err}</div>;
-  if (!post) return <div>로딩중…</div>;
+  if (err) return <div className="error">{err}</div>;
+  if (!post) return <div className="muted">로딩중…</div>;
 
   return (
     <div>
-      <h2 style={{ margin: "0 0 8px" }}>{post.title}</h2>
-      <div style={{ color: "rgba(255,255,255,0.6)", marginBottom: 16 }}>
-        생성: {new Date(post.createdAt).toLocaleString()} / 수정: {new Date(post.updatedAt).toLocaleString()}
+      <h2 className="pageTitle">{post.title}</h2>
+
+      <div className="row" style={{ justifyContent: "space-between", marginBottom: 10 }}>
+        <div className="muted" style={{ fontSize: 12 }}>
+          생성: {new Date(post.createdAt).toLocaleString()} · 수정: {new Date(post.updatedAt).toLocaleString()}
+        </div>
+        <span className="pill">#{post.id}</span>
       </div>
 
-      <pre
-        style={{
-          whiteSpace: "pre-wrap",
-          lineHeight: 1.5,
-          padding: 12,
-          background: "#1a1a1a",
-          border: "1px solid #333",
-          borderRadius: 8,
-        }}
-      >
-        {post.content}
-      </pre>
+      <div className="card cardPad">
+        <pre className="mono" style={{ margin: 0, whiteSpace: "pre-wrap" }}>
+          {post.content}
+        </pre>
+      </div>
 
-      <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-        <Link to={`/posts/${post.id}/edit`}>수정</Link>
-        <button onClick={onDelete}>삭제</button>
-        <div style={{ flex: 1 }} />
-        <Link to="/">목록</Link>
+      <div className="row" style={{ gap: 10, marginTop: 14 }}>
+        <Link to={`/posts/${post.id}/edit`} className="btn btnPrimary">
+          수정
+        </Link>
+        <button className="btn btnDanger" onClick={onDelete}>
+          삭제
+        </button>
+        <div className="spacer" />
+        <Link to="/" className="btn btnLink">
+          목록
+        </Link>
       </div>
     </div>
   );
