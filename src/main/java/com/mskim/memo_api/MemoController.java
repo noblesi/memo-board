@@ -11,6 +11,7 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/memos")
+@SuppressWarnings("null")
 public class MemoController {
 
     private final MemoRepository repo;

@@ -1,9 +1,14 @@
-import { Link, Route, Routes } from "react-router-dom";
+import { Link, Route, Routes, useLocation } from "react-router-dom";
 import PostListPage from "./pages/PostListPage";
 import PostDetailPage from "./pages/PostDetailPage";
 import PostEditPage from "./pages/PostEditPage";
 
 export default function App() {
+  const { pathname } = useLocation();
+
+  // 작성/수정 화면에서는 "새 글" 숨김
+  const hideNewLink = pathname === "/new" || pathname.endsWith("/edit");
+
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: 16 }}>
       <header style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 16 }}>
@@ -11,7 +16,7 @@ export default function App() {
           SimpleBoard
         </Link>
         <div style={{ flex: 1 }} />
-        <Link to="/new">새 글</Link>
+        {!hideNewLink && <Link to="/new">새 글</Link>}
       </header>
 
       <Routes>

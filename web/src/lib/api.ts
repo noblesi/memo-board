@@ -23,6 +23,33 @@ export type PageRes<T> = {
   };
 };
 
+export type ApiFieldError = { field: string; message: string };
+
+export type ApiErrorRes = {
+  timestamp: string;
+  status: number;
+  error: string;
+  message: string;
+  path: string;
+  fieldErrors: ApiFieldError[];
+};
+
+export class ApiError extends Error {
+  status: number;
+  path?: string;
+  fieldErrors: ApiFieldError[];
+  raw?: unknown;
+
+  constructor(message: string, status: number, fieldErrors: ApiFieldError[] = [], path?: string, raw?: unknown) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.fieldErrors = fieldErrors;
+    this.path = path;
+    this.raw = raw;
+  }
+}
+
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8080";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -31,12 +58,42 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
   });
 
+  const text = await res.text().catch(() => "");
+  const contentType = res.headers.get("content-type") ?? "";
+
+  // 에러 응답: JSON(ErrorRes)면 파싱해서 ApiError로 던짐
   if (!res.ok) {
-    // 백엔드 에러 포맷이 있으면 여기서 파싱해서 메시지 개선 가능
-    const text = await res.text().catch(() => "");
-    throw new Error(text || `HTTP ${res.status}`);
+    if (contentType.includes("application/json") && text) {
+      try {
+        const data = JSON.parse(text) as Partial<ApiErrorRes>;
+        const msg = typeof data.message === "string" ? data.message : `HTTP ${res.status}`;
+
+        const fields: ApiFieldError[] = Array.isArray(data.fieldErrors)
+          ? data.fieldErrors
+              .filter((x) => x && typeof x.field === "string" && typeof x.message === "string")
+              .map((x) => ({ field: x.field, message: x.message }))
+          : [];
+
+        throw new ApiError(msg, res.status, fields, typeof data.path === "string" ? data.path : path, data);
+      } catch {
+        // 파싱 실패하면 fallthrough
+      }
+    }
+
+    throw new ApiError(text || `HTTP ${res.status}`, res.status, [], path, text);
   }
-  return (await res.json()) as T;
+
+  // 204 또는 빈 바디면 JSON 파싱하지 않음
+  if (res.status === 204 || text.trim() === "") {
+    return undefined as T;
+  }
+
+  // 정상 응답은 기본 JSON
+  if (contentType.includes("application/json")) {
+    return JSON.parse(text) as T;
+  }
+
+  return text as unknown as T;
 }
 
 export function listPosts(params: { page?: number; size?: number; q?: string } = {}) {
@@ -47,6 +104,8 @@ export function listPosts(params: { page?: number; size?: number; q?: string } =
   const qs = usp.toString();
   return request<PageRes<PostSummary>>(`/posts${qs ? `?${qs}` : ""}`);
 }
+
+
 
 export function getPost(id: number) {
   return request<Post>(`/posts/${id}`);

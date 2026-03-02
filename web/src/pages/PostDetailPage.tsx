@@ -33,11 +33,20 @@ export default function PostDetailPage() {
   return (
     <div>
       <h2 style={{ margin: "0 0 8px" }}>{post.title}</h2>
-      <div style={{ color: "#666", marginBottom: 16 }}>
+      <div style={{ color: "rgba(255,255,255,0.6)", marginBottom: 16 }}>
         생성: {new Date(post.createdAt).toLocaleString()} / 수정: {new Date(post.updatedAt).toLocaleString()}
       </div>
 
-      <pre style={{ whiteSpace: "pre-wrap", lineHeight: 1.5, padding: 12, background: "#fafafa", borderRadius: 8 }}>
+      <pre
+        style={{
+          whiteSpace: "pre-wrap",
+          lineHeight: 1.5,
+          padding: 12,
+          background: "#1a1a1a",
+          border: "1px solid #333",
+          borderRadius: 8,
+        }}
+      >
         {post.content}
       </pre>
 

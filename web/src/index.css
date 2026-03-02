@@ -66,3 +66,48 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+input,
+textarea,
+select {
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 0.6em 0.8em;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* light theme 대응 */
+@media (prefers-color-scheme: light) {
+  input,
+  textarea,
+  select {
+    color: #213547;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #666;
+  }
+}
+
+input,
+textarea,
+select {
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(255, 255, 255, 0.55);
+}

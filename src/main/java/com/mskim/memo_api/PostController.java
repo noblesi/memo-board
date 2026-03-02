@@ -20,6 +20,7 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/posts")
+@SuppressWarnings("null")
 public class PostController {
 
     private final PostRepository repo;
