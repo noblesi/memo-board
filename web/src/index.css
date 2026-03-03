@@ -1,18 +1,43 @@
 :root {
-  color-scheme: light dark;
+  /* 기본은 라이트(화이트) */
+  color-scheme: light;
 
-  --bg: #0b1020;
-  --panel: rgba(255, 255, 255, 0.06);
-  --panel2: rgba(255, 255, 255, 0.08);
-  --text: rgba(255, 255, 255, 0.92);
-  --muted: rgba(255, 255, 255, 0.64);
-  --border: rgba(255, 255, 255, 0.12);
-  --primary: #7c5cff;
-  --primary2: rgba(124, 92, 255, 0.18);
-  --danger: #ff5c7a;
-  --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  --bg: #f7f8fb;
+  --bgDecor1: rgba(124, 92, 255, 0.10);
+  --bgDecor2: rgba(61, 195, 255, 0.08);
+
+  --cardBg: rgba(255, 255, 255, 0.78);
+  --panel: rgba(255, 255, 255, 0.78);
+  --panel2: rgba(255, 255, 255, 0.92);
+
+  --text: rgba(15, 23, 42, 0.92);
+  --muted: rgba(15, 23, 42, 0.62);
+  --border: rgba(15, 23, 42, 0.14);
+
+  --primary: #5b5cff;
+  --primary2: rgba(91, 92, 255, 0.14);
+  --danger: #ff3b6a;
+
+  --shadow: 0 18px 40px rgba(2, 6, 23, 0.08);
   --radius: 16px;
-  --focus: 0 0 0 3px rgba(124, 92, 255, 0.35);
+  --focus: 0 0 0 3px rgba(91, 92, 255, 0.28);
+
+  --inputBg: rgba(255, 255, 255, 0.92);
+  --btnBg: rgba(255, 255, 255, 0.86);
+  --btnBgHover: rgba(255, 255, 255, 0.98);
+
+  --tableBg: rgba(255, 255, 255, 0.72);
+  --tableRowHover: rgba(15, 23, 42, 0.04);
+
+  /* ✅ 라이트/다크 공통 컴포넌트 색상(변수로만 사용) */
+  --borderHover: rgba(15, 23, 42, 0.22);
+  --pillBg: rgba(15, 23, 42, 0.06);
+  --btnLinkHoverBg: rgba(15, 23, 42, 0.06);
+  --btnLinkHoverBorder: rgba(15, 23, 42, 0.12);
+
+  --primaryBtnBorder: rgba(91, 92, 255, 0.55);
+  --primaryBtnBg: linear-gradient(180deg, rgba(91, 92, 255, 0.98), rgba(91, 92, 255, 0.86));
+  --primaryBtnBgHover: linear-gradient(180deg, rgba(91, 92, 255, 1), rgba(91, 92, 255, 0.92));
 
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
     Apple Color Emoji, Segoe UI Emoji;
@@ -24,16 +49,45 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: #f7f8fb;
-    --panel: rgba(15, 23, 42, 0.04);
-    --panel2: rgba(15, 23, 42, 0.06);
-    --text: rgba(15, 23, 42, 0.92);
-    --muted: rgba(15, 23, 42, 0.62);
-    --border: rgba(15, 23, 42, 0.14);
-    --shadow: 0 18px 40px rgba(2, 6, 23, 0.08);
-  }
+:root[data-theme="dark"] {
+  /* 사용자 선택: 다크 */
+  color-scheme: dark;
+
+  --bg: #0b1020;
+  --bgDecor1: rgba(124, 92, 255, 0.18);
+  --bgDecor2: rgba(61, 195, 255, 0.14);
+
+  --cardBg: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+  --panel: rgba(255, 255, 255, 0.06);
+  --panel2: rgba(255, 255, 255, 0.08);
+
+  --text: rgba(255, 255, 255, 0.92);
+  --muted: rgba(255, 255, 255, 0.64);
+  --border: rgba(255, 255, 255, 0.12);
+
+  --primary: #7c5cff;
+  --primary2: rgba(124, 92, 255, 0.18);
+  --danger: #ff5c7a;
+
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  --focus: 0 0 0 3px rgba(124, 92, 255, 0.35);
+
+  --inputBg: rgba(0, 0, 0, 0.18);
+  --btnBg: rgba(0, 0, 0, 0.18);
+  --btnBgHover: rgba(0, 0, 0, 0.24);
+
+  --tableBg: rgba(0, 0, 0, 0.12);
+  --tableRowHover: rgba(255, 255, 255, 0.05);
+
+  /* ✅ 다크에서 기존 톤 유지 */
+  --borderHover: rgba(255, 255, 255, 0.18);
+  --pillBg: rgba(255, 255, 255, 0.06);
+  --btnLinkHoverBg: rgba(255, 255, 255, 0.06);
+  --btnLinkHoverBorder: rgba(255, 255, 255, 0.12);
+
+  --primaryBtnBorder: rgba(124, 92, 255, 0.5);
+  --primaryBtnBg: linear-gradient(180deg, var(--primary2), rgba(0, 0, 0, 0.18));
+  --primaryBtnBgHover: linear-gradient(180deg, rgba(124, 92, 255, 0.24), rgba(0, 0, 0, 0.22));
 }
 
 * {
@@ -46,8 +100,8 @@ body {
   min-height: 100vh;
   color: var(--text);
   background:
-    radial-gradient(900px 500px at 20% 10%, rgba(124, 92, 255, 0.18), transparent 55%),
-    radial-gradient(900px 500px at 80% 0%, rgba(61, 195, 255, 0.14), transparent 55%),
+    radial-gradient(900px 500px at 20% 10%, var(--bgDecor1), transparent 55%),
+    radial-gradient(900px 500px at 80% 0%, var(--bgDecor2), transparent 55%),
     var(--bg);
 }
 
@@ -100,14 +154,14 @@ a:hover {
 
 /* Card */
 .card {
-  background: linear-gradient(180deg, var(--panel), rgba(255, 255, 255, 0.03));
+  background: var(--cardBg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
 }
 
 .cardPad {
-  padding: 14px;
+  padding: 12px;
 }
 
 /* Controls */
@@ -117,6 +171,9 @@ a:hover {
   align-items: center;
 }
 
+/* Flex row for input + action button (e.g., search bar)
+   - Prevents the input from claiming 100% width inside flex
+   - Keeps the button from shrinking and wrapping text vertically */
 .rowControls {
   display: flex;
   gap: 10px;
@@ -132,8 +189,16 @@ a:hover {
 
 .rowControls > .btn {
   flex: 0 0 auto;
-  white-space: nowrap;
   min-width: 72px;
+}
+
+@media (max-width: 480px) {
+  .rowControls {
+    flex-wrap: wrap;
+  }
+  .rowControls > .btn {
+    width: 100%;
+  }
 }
 
 .stack {
@@ -146,20 +211,12 @@ a:hover {
 .select {
   width: 100%;
   color: var(--text);
-  background: rgba(0, 0, 0, 0.18);
+  background: var(--inputBg);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 10px 12px;
   outline: none;
   transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
-}
-
-@media (prefers-color-scheme: light) {
-  .input,
-  .textarea,
-  .select {
-    background: rgba(255, 255, 255, 0.7);
-  }
 }
 
 .textarea {
@@ -181,7 +238,7 @@ a:hover {
   padding: 10px 12px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.18);
+  background: var(--btnBg);
   color: var(--text);
   cursor: pointer;
   user-select: none;
@@ -190,8 +247,8 @@ a:hover {
 }
 
 .btn:hover {
-  background: rgba(0, 0, 0, 0.24);
-  border-color: rgba(255, 255, 255, 0.18);
+  background: var(--btnBgHover);
+  border-color: var(--borderHover);
   text-decoration: none;
 }
 
@@ -205,8 +262,14 @@ a:hover {
 }
 
 .btnPrimary {
-  border-color: rgba(124, 92, 255, 0.5);
-  background: linear-gradient(180deg, var(--primary2), rgba(0, 0, 0, 0.18));
+  border-color: var(--primaryBtnBorder);
+  background: var(--primaryBtnBg);
+  color: rgba(255, 255, 255, 0.96);
+}
+
+.btn.btnPrimary:hover {
+  background: var(--primaryBtnBgHover);
+  border-color: var(--primaryBtnBorder);
 }
 
 .btnDanger {
@@ -219,8 +282,30 @@ a:hover {
 }
 
 .btnLink:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.12);
+  background: var(--btnLinkHoverBg);
+  border-color: var(--btnLinkHoverBorder);
+}
+
+.btnIcon {
+  padding: 9px 10px;
+  border-radius: 12px;
+}
+
+.btnLabel {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Table */
@@ -228,7 +313,7 @@ a:hover {
   overflow: auto;
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.12);
+  background: var(--tableBg);
 }
 
 .table {
@@ -240,7 +325,7 @@ a:hover {
 .table th,
 .table td {
   text-align: left;
-  padding: 12px 12px;
+  padding: 10px 12px; /* ✅ 조금 더 컴팩트 */
   border-top: 1px solid var(--border);
 }
 
@@ -248,11 +333,15 @@ a:hover {
   border-top: none;
   font-size: 13px;
   color: var(--muted);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--panel2);
 }
 
 .table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--tableRowHover);
+}
+
+.tableRowClickable {
+  cursor: pointer;
 }
 
 /* Alerts */
@@ -260,8 +349,21 @@ a:hover {
   padding: 10px 12px;
   border-radius: 12px;
   border: 1px solid rgba(255, 92, 122, 0.4);
-  background: rgba(255, 92, 122, 0.08);
+  background: var(--panel2);
   color: var(--text);
+  font-size: 12px;
+}
+
+/* Empty/Loading */
+.emptyState {
+  text-align: center;
+  padding: 18px 12px;
+}
+
+.emptyTitle {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
 }
 
 /* Helpers */
@@ -281,7 +383,7 @@ a:hover {
   padding: 4px 10px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--pillBg);
   color: var(--muted);
   font-size: 12px;
 }

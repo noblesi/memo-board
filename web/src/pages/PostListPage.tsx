@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { listPosts } from "../lib/api";
 import type { PostSummary } from "../lib/api";
 
@@ -10,7 +10,14 @@ function parseNonNegInt(v: string | null, fallback: number) {
   return i >= 0 ? i : fallback;
 }
 
+type ListState = {
+  items: PostSummary[];
+  totalPages: number;
+  totalElements: number;
+};
+
 export default function PostListPage() {
+  const navigate = useNavigate();
   const [sp, setSp] = useSearchParams();
 
   // URL -> 상태(소스오브트루스)
@@ -21,22 +28,45 @@ export default function PostListPage() {
   const [draftQ, setDraftQ] = useState(qParam);
   useEffect(() => setDraftQ(qParam), [qParam]);
 
-  const [data, setData] = useState<{
-    items: PostSummary[];
-    totalPages: number;
-    totalElements: number;
-  } | null>(null);
-
+  const [data, setData] = useState<ListState | null>(null);
+  const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
+  const dtf = useMemo(
+    () =>
+      new Intl.DateTimeFormat("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }),
+    [],
+  );
+
+  function formatDate(iso: string) {
+    const d = new Date(iso);
+    if (Number.isNaN(d.valueOf())) return iso;
+    return dtf.format(d);
+  }
+
   async function load(p: number, query: string) {
+    setLoading(true);
     setErr(null);
-    const res = await listPosts({ page: p, size: 20, q: query.trim() ? query.trim() : undefined });
-    setData({
-      items: res.items,
-      totalPages: res.page.totalPages,
-      totalElements: res.page.totalElements,
-    });
+    try {
+      const trimmed = query.trim();
+      const res = await listPosts({ page: p, size: 20, q: trimmed ? trimmed : undefined });
+      setData({
+        items: res.items,
+        totalPages: res.page.totalPages,
+        totalElements: res.page.totalElements,
+      });
+    } catch (e) {
+      setErr(String((e as any)?.message ?? e));
+    } finally {
+      setLoading(false);
+    }
   }
 
   function setQueryPage(nextQ: string, nextPage: number) {
@@ -48,11 +78,15 @@ export default function PostListPage() {
 
   // URL이 바뀌면 다시 로드 (새로고침/뒤로가기/링크 공유 포함)
   useEffect(() => {
-    load(pageParam, qParam).catch((e) => setErr(String((e as any)?.message ?? e)));
+    load(pageParam, qParam);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageParam, qParam]);
 
   const totalPages = Math.max(1, data?.totalPages ?? 1);
+  const totalCountText = loading && !data ? "…" : String(data?.totalElements ?? 0);
+
+  const showLoadingFirst = loading && !data;
+  const showEmpty = !loading && !!data && data.items.length === 0;
 
   return (
     <div>
@@ -67,15 +101,15 @@ export default function PostListPage() {
               if (e.key === "Enter") setQueryPage(draftQ, 0);
             }}
           />
-          <button className="btn btnPrimary" onClick={() => setQueryPage(draftQ, 0)}>
+          <button className="btn btnPrimary" onClick={() => setQueryPage(draftQ, 0)} disabled={loading}>
             검색
           </button>
         </div>
 
         <div className="row" style={{ marginTop: 10, justifyContent: "space-between" }}>
-          <span className="pill">총 {data?.totalElements ?? 0}개</span>
+          <span className="pill">총 {totalCountText}개</span>
           <span className="muted" style={{ fontSize: 12 }}>
-            URL에 검색/페이지가 반영되어 공유/뒤로가기가 자연스럽게 동작합니다.
+            검색/페이지가 URL에 반영됩니다.
           </span>
         </div>
       </div>
@@ -86,47 +120,86 @@ export default function PostListPage() {
         </div>
       )}
 
-      <div className="tableWrap">
-        <table className="table">
-          <thead>
-            <tr>
-              <th style={{ width: 90 }}>ID</th>
-              <th>제목</th>
-              <th style={{ width: 220 }}>수정일</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(data?.items ?? []).map((p) => (
-              <tr key={p.id}>
-                <td className="mono">{p.id}</td>
-                <td>
-                  <Link to={`/posts/${p.id}`}>{p.title}</Link>
-                </td>
-                <td className="muted">{new Date(p.updatedAt).toLocaleString()}</td>
-              </tr>
-            ))}
+      {showLoadingFirst && (
+        <div className="card cardPad emptyState" style={{ marginBottom: 12 }}>
+          <div className="emptyTitle">불러오는 중…</div>
+          <div className="muted">게시글 목록을 가져오고 있습니다.</div>
+        </div>
+      )}
 
-            {data && data.items.length === 0 && (
+      {showEmpty && (
+        <div className="card cardPad emptyState" style={{ marginBottom: 12 }}>
+          <div className="emptyTitle">게시글이 없습니다</div>
+          <div className="muted">첫 글을 작성해보세요.</div>
+          <div className="row" style={{ justifyContent: "center", marginTop: 12 }}>
+            <Link to="/new" className="btn btnPrimary">
+              새 글 작성
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {!showLoadingFirst && !showEmpty && (
+        <div className="tableWrap">
+          <table className="table">
+            <thead>
               <tr>
-                <td colSpan={3} className="muted">
-                  게시글이 없습니다.
-                </td>
+                <th style={{ width: 90 }}>ID</th>
+                <th>제목</th>
+                <th style={{ width: 220 }}>수정일</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {(data?.items ?? []).map((p) => (
+                <tr
+                  key={p.id}
+                  className="tableRowClickable"
+                  onClick={() => navigate(`/posts/${p.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") navigate(`/posts/${p.id}`);
+                  }}
+                  tabIndex={0}
+                  role="link"
+                  aria-label={`게시글 ${p.id} 열기`}
+                >
+                  <td className="mono">{p.id}</td>
+                  <td style={{ fontWeight: 600 }}>
+                    <Link to={`/posts/${p.id}`} onClick={(e) => e.stopPropagation()}>
+                      {p.title}
+                    </Link>
+                  </td>
+                  <td className="muted">{formatDate(p.updatedAt)}</td>
+                </tr>
+              ))}
+
+              {data && data.items.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="muted">
+                    게시글이 없습니다.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <div className="row" style={{ gap: 10, marginTop: 12 }}>
-        <button className="btn" disabled={pageParam <= 0} onClick={() => setQueryPage(qParam, pageParam - 1)}>
+        <button
+          className="btn"
+          disabled={loading || pageParam <= 0}
+          onClick={() => setQueryPage(qParam, pageParam - 1)}
+        >
           이전
         </button>
+
         <span className="muted">
           {Math.min(pageParam + 1, totalPages)} / {totalPages}
         </span>
+
         <button
           className="btn"
-          disabled={data ? pageParam >= totalPages - 1 : true}
+          disabled={loading || (data ? pageParam >= totalPages - 1 : true)}
           onClick={() => setQueryPage(qParam, pageParam + 1)}
         >
           다음
