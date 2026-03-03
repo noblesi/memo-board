@@ -3,3 +3,6 @@ spring:
     url: jdbc:postgresql://localhost:15432/app
     username: app
     password: app
+
+server:
+  port: 18080

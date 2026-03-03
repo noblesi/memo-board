@@ -41,7 +41,7 @@ $env:SPRING_PROFILES_ACTIVE="local"
 .\mvnw.cmd spring-boot:run
 ```
 
-API: http://localhost:8080
+API: http://localhost:18080
 
 ### 3) Frontend (Vite/React)
 
@@ -57,7 +57,7 @@ Web: http://127.0.0.1:34567
 > 프론트에서 백엔드 주소를 바꾸려면 web/.env.local에 아래를 추가하세요.
 
 ```
-VITE_API_BASE=http://localhost:8080
+VITE_API_BASE=http://localhost:18080
 ```
 
 ## Features
