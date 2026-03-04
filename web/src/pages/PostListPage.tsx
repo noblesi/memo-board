@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { listPosts } from "../lib/api";
 import type { PostSummary } from "../lib/api";
 
@@ -18,6 +18,8 @@ type ListState = {
 
 export default function PostListPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.pathname + location.search;
   const [sp, setSp] = useSearchParams();
 
   // URL -> 상태(소스오브트루스)
@@ -132,7 +134,7 @@ export default function PostListPage() {
           <div className="emptyTitle">게시글이 없습니다</div>
           <div className="muted">첫 글을 작성해보세요.</div>
           <div className="row" style={{ justifyContent: "center", marginTop: 12 }}>
-            <Link to="/new" className="btn btnPrimary">
+            <Link to="/new" state={{ from }} className="btn btnPrimary">
               새 글 작성
             </Link>
           </div>
@@ -154,9 +156,9 @@ export default function PostListPage() {
                 <tr
                   key={p.id}
                   className="tableRowClickable"
-                  onClick={() => navigate(`/posts/${p.id}`)}
+                  onClick={() => navigate(`/posts/${p.id}`, { state: { from } })}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") navigate(`/posts/${p.id}`);
+                    if (e.key === "Enter") navigate(`/posts/${p.id}`, { state: { from } });
                   }}
                   tabIndex={0}
                   role="link"
@@ -164,7 +166,7 @@ export default function PostListPage() {
                 >
                   <td className="mono">{p.id}</td>
                   <td style={{ fontWeight: 600 }}>
-                    <Link to={`/posts/${p.id}`} onClick={(e) => e.stopPropagation()}>
+                    <Link to={`/posts/${p.id}`} state={{ from }} onClick={(e) => e.stopPropagation()}>
                       {p.title}
                     </Link>
                   </td>

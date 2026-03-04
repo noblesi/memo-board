@@ -26,7 +26,9 @@ function getSystemTheme(): Theme {
 }
 
 export default function App() {
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname, search } = location;
+  const from = pathname + search;
 
   // 작성/수정 화면에서는 "새 글" 숨김
   const hideNewLink = pathname === "/new" || pathname.endsWith("/edit");
@@ -73,7 +75,7 @@ export default function App() {
           </button>
 
           {!hideNewLink && (
-            <Link to="/new" className="btn btnPrimary">
+            <Link to="/new" state={{ from }} className="btn btnPrimary">
               새 글
             </Link>
           )}

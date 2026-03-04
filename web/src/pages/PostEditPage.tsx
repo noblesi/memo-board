@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
 import { ApiError, createPost, getPost, updatePost } from "../lib/api";
+
+type NavState = { from?: string };
 
 const TITLE_MAX = 100;
 const CONTENT_MAX = 5000;
@@ -11,6 +13,8 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
   const isValidId = Number.isFinite(postId) && postId > 0;
 
   const nav = useNavigate();
+  const location = useLocation();
+  const from = (location.state as NavState | null)?.from;
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -109,7 +113,7 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
     return <div className="error">잘못된 접근입니다.</div>;
   }
 
-  const cancelTo = mode === "create" ? "/" : `/posts/${postId}`;
+  const cancelTo = mode === "create" ? from ?? "/" : `/posts/${postId}`;
 
   return (
     <div>

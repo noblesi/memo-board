@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { use, useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { deletePost, getPost } from "../lib/api";
 import type { Post } from "../lib/api";
+
+type NavState = { from?: string };
 
 export default function PostDetailPage() {
   const { id } = useParams();
@@ -9,6 +11,8 @@ export default function PostDetailPage() {
   const isValidId = Number.isFinite(postId) && postId > 0;
 
   const nav = useNavigate();
+  const location = useLocation();
+  const backTo = (location.state as NavState | null)?.from ?? "/";
 
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(false);
@@ -61,7 +65,7 @@ export default function PostDetailPage() {
 
     try {
       await deletePost(postId);
-      nav("/");
+      nav(backTo);
     } catch (e: any) {
       setErr(String(e?.message ?? e));
       setDeleting(false);
@@ -75,7 +79,7 @@ export default function PostDetailPage() {
         <div className="error" style={{ marginBottom: 12 }}>
           {err}
         </div>
-        <Link to="/" className="btn btnLink">
+        <Link to={backTo} className="btn btnLink">
           목록으로
         </Link>
       </div>
@@ -90,7 +94,7 @@ export default function PostDetailPage() {
           <div className="emptyTitle">불러오는 중…</div>
           <div className="muted">게시글 내용을 가져오고 있습니다.</div>
         </div>
-        <Link to="/" className="btn btnLink">
+        <Link to={backTo} className="btn btnLink">
           목록으로
         </Link>
       </div>
@@ -103,7 +107,7 @@ export default function PostDetailPage() {
         <h2 className="pageTitle">게시글</h2>
         <div className="muted">데이터가 없습니다.</div>
         <div style={{ marginTop: 12 }}>
-          <Link to="/" className="btn btnLink">
+          <Link to={backTo} className="btn btnLink">
             목록으로
           </Link>
         </div>
@@ -129,7 +133,7 @@ export default function PostDetailPage() {
       </div>
 
       <div className="row" style={{ gap: 10, marginTop: 14 }}>
-        <Link to={`/posts/${post.id}/edit`} className="btn btnPrimary">
+        <Link to={`/posts/${post.id}/edit`} state={{ from: backTo }} className="btn btnPrimary">
           수정
         </Link>
 
