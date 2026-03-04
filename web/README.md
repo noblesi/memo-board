@@ -69,6 +69,9 @@ docker volume rm memo-postgres-data
 ### 2) Backend (Spring Boot)
 > src/main/resources/application-local.yml에 로컬 DB 설정을 둡니다.
 
+- local 프로필로 실행하면(application-local.yml 적용) API가 http://localhost:18080 에서 뜹니다.
+- 프로필 없이 실행하면(기본 설정) API가 http://localhost:8080 에서 뜹니다.
+
 ```yml
 spring:
   datasource:
@@ -80,7 +83,7 @@ spring:
 레포루트에서:
 ```powershell
 cd memo-api
-$env:SPRING_PROFILES_ACTIVE="local"
+$env:SPRING_PROFILES_ACTIVE="local" 
 .\mvnw.cmd spring-boot:run
 ```
 
