@@ -1,9 +1,10 @@
-import { use, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { deletePost, getPost } from "../lib/api";
 import type { Post } from "../lib/api";
 
-type NavState = { from?: string };
+type Flash = { type: "success" | "error"; message: string };
+type NavState = { from?: string; flash?: Flash };
 
 export default function PostDetailPage() {
   const { id } = useParams();
@@ -65,7 +66,11 @@ export default function PostDetailPage() {
 
     try {
       await deletePost(postId);
-      nav(backTo);
+      nav(backTo, {
+        state: {
+          flash: { type: "success", message: "삭제되었습니다." },
+        } satisfies NavState,
+      });
     } catch (e: any) {
       setErr(String(e?.message ?? e));
       setDeleting(false);
@@ -116,7 +121,7 @@ export default function PostDetailPage() {
   }
 
   return (
-    <div>
+    <div aria-busy={deleting}>
       <h2 className="pageTitle">{post.title}</h2>
 
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 10 }}>
@@ -133,7 +138,15 @@ export default function PostDetailPage() {
       </div>
 
       <div className="row" style={{ gap: 10, marginTop: 14 }}>
-        <Link to={`/posts/${post.id}/edit`} state={{ from: backTo }} className="btn btnPrimary">
+        <Link
+          to={`/posts/${post.id}/edit`}
+          state={{ from: backTo }}
+          className={`btn btnPrimary ${deleting ? "isDisabled" : ""}`}
+          aria-disabled={deleting}
+          onClick={(e) => {
+            if (deleting) e.preventDefault();
+          }}
+        >
           수정
         </Link>
 
@@ -143,7 +156,7 @@ export default function PostDetailPage() {
 
         <div className="spacer" />
 
-        <Link to="/" className="btn btnLink">
+        <Link to={backTo} className="btn btnLink">
           목록
         </Link>
       </div>

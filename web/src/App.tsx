@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, Route, Routes, useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import PostListPage from "./pages/PostListPage";
 import PostDetailPage from "./pages/PostDetailPage";
 import PostEditPage from "./pages/PostEditPage";
@@ -7,6 +7,9 @@ import PostEditPage from "./pages/PostEditPage";
 const THEME_KEY = "sb_theme";
 
 type Theme = "light" | "dark";
+
+type Flash = { type: "success" | "error"; message: string };
+type NavState = { from?: string; flash?: Flash };
 
 function getStoredTheme(): Theme | null {
   try {
@@ -27,6 +30,8 @@ function getSystemTheme(): Theme {
 
 export default function App() {
   const location = useLocation();
+  const nav = useNavigate();
+
   const { pathname, search } = location;
   const from = pathname + search;
 
@@ -52,8 +57,54 @@ export default function App() {
 
   const nextTheme: Theme = theme === "dark" ? "light" : "dark";
 
+  // ✅ Flash Toast
+  const [toast, setToast] = useState<Flash | null>(null);
+  const timerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const state = (location.state as NavState | null) ?? null;
+    const flash = state?.flash;
+    if (!flash) return;
+
+    setToast(flash);
+
+    // flash는 1회 소비 후 history state에서 제거(뒤로가기/새로고침 반복 방지)
+    const raw = (location.state ?? {}) as Record<string, unknown>;
+    const { flash: _flash, ...rest } = raw;
+    nav(pathname + search, { replace: true, state: rest });
+
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => setToast(null), 2800);
+  }, [location.key, location.state, nav, pathname, search]);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  function closeToast() {
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+    timerRef.current = null;
+    setToast(null);
+  }
+
   return (
     <div className="appShell">
+      {toast && (
+        <div className="toastHost" aria-live="polite" role="status">
+          <div className={`toast ${toast.type === "error" ? "toastError" : "toastSuccess"}`}>
+            <span className="toastIcon" aria-hidden>
+              {toast.type === "error" ? "⚠️" : "✅"}
+            </span>
+            <div className="toastMsg">{toast.message}</div>
+            <button type="button" className="toastClose" onClick={closeToast} aria-label="닫기">
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="container">
         <header className="topbar">
           <Link to="/" className="brand">

@@ -400,3 +400,76 @@ a:hover {
     min-width: 520px;
   }
 }
+
+/* Toast (Flash) */
+.toastHost {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none; /* 토스트만 클릭 가능 */
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--panel2);
+  box-shadow: var(--shadow);
+  max-width: 360px;
+}
+
+.toastSuccess {
+  border-color: rgba(91, 92, 255, 0.55);
+}
+
+.toastError {
+  border-color: rgba(255, 92, 122, 0.5);
+}
+
+.toastIcon {
+  font-size: 16px;
+  line-height: 1.2;
+  margin-top: 1px;
+}
+
+.toastMsg {
+  font-size: 12px;
+  color: var(--text);
+}
+
+.toastClose {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.toastClose:hover {
+  background: var(--btnLinkHoverBg);
+  color: var(--text);
+}
+
+/* Link도 disabled처럼 보이게 */
+.btn.isDisabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* 입력 잠금 시 가시성 */
+.input:disabled,
+.textarea:disabled,
+.select:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
