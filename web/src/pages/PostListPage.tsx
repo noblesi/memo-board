@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { listPosts } from "../lib/api";
 import type { PostSummary } from "../lib/api";
@@ -20,6 +20,7 @@ export default function PostListPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.pathname + location.search;
+
   const [sp, setSp] = useSearchParams();
 
   // URL -> 상태(소스오브트루스)
@@ -29,6 +30,8 @@ export default function PostListPage() {
   // 입력 중인 검색어(즉시 URL에 반영하지 않고, "검색" 버튼 눌렀을 때 반영)
   const [draftQ, setDraftQ] = useState(qParam);
   useEffect(() => setDraftQ(qParam), [qParam]);
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const [data, setData] = useState<ListState | null>(null);
   const [loading, setLoading] = useState(false);
@@ -78,6 +81,12 @@ export default function PostListPage() {
     setSp(next);
   }
 
+  function clearSearch(apply = true) {
+    setDraftQ("");
+    if (apply) setQueryPage("", 0);
+    inputRef.current?.focus();
+  }
+
   // URL이 바뀌면 다시 로드 (새로고침/뒤로가기/링크 공유 포함)
   useEffect(() => {
     load(pageParam, qParam);
@@ -95,21 +104,43 @@ export default function PostListPage() {
       <div className="card cardPad" style={{ marginBottom: 12 }}>
         <div className="rowControls">
           <input
+            ref={inputRef}
             className="input"
             value={draftQ}
             onChange={(e) => setDraftQ(e.target.value)}
             placeholder="검색(제목/내용)"
             onKeyDown={(e) => {
               if (e.key === "Enter") setQueryPage(draftQ, 0);
+              if (e.key === "Escape") {
+                // draft만 지우지 말고, 실제 검색도 해제(UX 일관)
+                clearSearch(true);
+              }
             }}
           />
+
+          {draftQ.trim().length > 0 && (
+            <button
+              type="button"
+              className="btn btnIcon"
+              title="검색어 지우기 (Esc)"
+              aria-label="검색어 지우기"
+              onClick={() => clearSearch(true)}
+              disabled={loading}
+            >
+              ✕
+            </button>
+          )}
+
           <button className="btn btnPrimary" onClick={() => setQueryPage(draftQ, 0)} disabled={loading}>
             검색
           </button>
         </div>
 
         <div className="row" style={{ marginTop: 10, justifyContent: "space-between" }}>
-          <span className="pill">총 {totalCountText}개</span>
+          <div className="row" style={{ gap: 8 }}>
+            <span className="pill">총 {totalCountText}개</span>
+            {qParam.trim() && <span className="pill">검색: {qParam.trim()}</span>}
+          </div>
           <span className="muted" style={{ fontSize: 12 }}>
             검색/페이지가 URL에 반영됩니다.
           </span>

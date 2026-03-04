@@ -171,6 +171,18 @@ a:hover {
   align-items: center;
 }
 
+/* Search clear icon button sizing in rowControls */
+.rowControls > .btn.btnIcon {
+  min-width: 44px; /* 기존 72px override */
+  padding: 9px 10px;
+}
+
+@media (max-width: 480px) {
+  .rowControls > .btn.btnIcon {
+    width: auto; /* 모바일에서도 아이콘 버튼은 100% 폭으로 늘리지 않음 */
+  }
+}
+
 /* Flex row for input + action button (e.g., search bar)
    - Prevents the input from claiming 100% width inside flex
    - Keeps the button from shrinking and wrapping text vertically */
