@@ -60,7 +60,6 @@ const SORT_OPTIONS: readonly DropdownOption<string>[] = [
   { value: "title,asc", label: "제목 A→Z" },
 ] as const;
 
-// ✅ 기본 정렬: 수정일 최신
 const DEFAULT_SORT = "updatedAt,desc";
 
 function normalizeSize(n: number) {
@@ -75,33 +74,27 @@ export default function PostListPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 목록 URL(검색/페이지/정렬/size 포함)을 상세/작성/수정으로 넘기기 위한 값
   const from = location.pathname + location.search;
 
-  // ✅ 이 페이지가 마운트될 때의 목록 URL(스크롤 복원 기준)
   const mountFromRef = useRef(from);
   const restoredRef = useRef(false);
 
   const [sp, setSp] = useSearchParams();
 
-  // URL -> 상태(소스오브트루스)
   const qParam = sp.get("q") ?? "";
   const pageParam = useMemo(() => parseNonNegInt(sp.get("page"), 0), [sp]);
   const sizeParam = useMemo(() => normalizeSize(parseNonNegInt(sp.get("size"), DEFAULT_SIZE)), [sp]);
   const sortParam = useMemo(() => normalizeSort(sp.get("sort") ?? DEFAULT_SORT), [sp]);
 
-  // 입력 중 검색어(draft)
   const [draftQ, setDraftQ] = useState(qParam);
   useEffect(() => setDraftQ(qParam), [qParam]);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // ✅ 마지막 목록 URL 기억(상세 새로고침 등에서 fallback)
   useEffect(() => {
     rememberLastList(from);
   }, [from]);
 
-  // ✅ 목록 떠날 때 스크롤 저장
   useEffect(() => {
     return () => {
       saveScroll(from);
@@ -161,7 +154,6 @@ export default function PostListPage() {
     const size = normalizeSize(next.size ?? sizeParam);
     const sort = normalizeSort(next.sort ?? sortParam);
 
-    // URL에 항상 page/size/sort는 반영, q는 비면 제거
     const params: Record<string, string> = {
       page: String(page),
       size: String(size),
@@ -178,13 +170,11 @@ export default function PostListPage() {
     inputRef.current?.focus();
   }
 
-  // URL이 바뀌면 다시 로드 (새로고침/뒤로가기/링크 공유 포함)
   useEffect(() => {
     load(pageParam, qParam, sizeParam, sortParam);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageParam, qParam, sizeParam, sortParam]);
 
-  // ✅ 첫 로드가 끝난 뒤(데이터/에러 확정) 스크롤 복원 (1회)
   useEffect(() => {
     if (restoredRef.current) return;
     if (data || err) {
@@ -204,6 +194,10 @@ export default function PostListPage() {
     [],
   );
 
+  const canPrev = !loading && pageParam > 0;
+  const canNext = !loading && (data ? pageParam < totalPages - 1 : false);
+  const pageLabel = `${Math.min(pageParam + 1, totalPages)} / ${totalPages}`;
+
   return (
     <div>
       {/* 상단: 최소 헤더 */}
@@ -217,7 +211,7 @@ export default function PostListPage() {
       </div>
 
       {/* 본문이 하단 고정 바에 가리지 않도록 패딩 확보 */}
-      <div style={{ paddingBottom: 170 }}>
+      <div style={{ paddingBottom: 190 }}>
         {err && (
           <div className="error" style={{ marginBottom: 12 }}>
             {err}
@@ -246,7 +240,6 @@ export default function PostListPage() {
         {!showLoadingFirst && !showEmpty && (
           <div className="postList">
             {(data?.items ?? []).map((p) => {
-              // 2순위(summary 필드) 붙이면 여기 미리보기가 실제로 채워짐
               const preview = String((p as any).summary ?? "").trim() || "…";
 
               return (
@@ -287,30 +280,12 @@ export default function PostListPage() {
             })}
           </div>
         )}
-
-        {/* 페이지네이션 */}
-        <div className="row" style={{ gap: 10, marginTop: 12 }}>
-          <button className="btn" disabled={loading || pageParam <= 0} onClick={() => setListParams({ page: pageParam - 1 })}>
-            이전
-          </button>
-
-          <span className="muted">
-            {Math.min(pageParam + 1, totalPages)} / {totalPages}
-          </span>
-
-          <button
-            className="btn"
-            disabled={loading || (data ? pageParam >= totalPages - 1 : true)}
-            onClick={() => setListParams({ page: pageParam + 1 })}
-          >
-            다음
-          </button>
-        </div>
       </div>
 
-      {/* ✅ 하단 고정 바 */}
+      {/* ✅ 하단 고정 바 (검색/옵션/페이지네이션) */}
       <div className="bottomDock">
         <div className="card cardPad bottomDockInner">
+          {/* 검색 */}
           <div className="row" style={{ justifyContent: "space-between", alignItems: "center", gap: 10 }}>
             <div className="rowControls" style={{ flex: 1 }}>
               <input
@@ -344,7 +319,7 @@ export default function PostListPage() {
             </div>
           </div>
 
-          {/* 옵션 바 */}
+          {/* 옵션 + 페이지네이션 */}
           <div
             className="row"
             style={{
@@ -355,12 +330,14 @@ export default function PostListPage() {
               flexWrap: "wrap",
             }}
           >
-            <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+            {/* 왼쪽: 총 개수/검색 태그 */}
+            <div className="row" style={{ gap: 8, flexWrap: "wrap", alignItems: "center" }}>
               <span className="pill">총 {totalCountText}개</span>
               {qParam.trim() && <span className="pill">검색: {qParam.trim()}</span>}
             </div>
 
-            <div className="row" style={{ gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+            {/* 오른쪽: 정렬/표시개수/페이지네이션 */}
+            <div className="row" style={{ gap: 10, flexWrap: "wrap", alignItems: "center" }}>
               <span className="muted" style={{ fontSize: 12 }}>
                 정렬
               </span>
@@ -388,6 +365,33 @@ export default function PostListPage() {
                 direction="up"
                 align="right"
               />
+
+              {/* ✅ 페이지 이동 (하단 고정 카드로 이동) */}
+              <div className="row" style={{ gap: 8, alignItems: "center" }}>
+                <button
+                  className="btn"
+                  onClick={() => setListParams({ page: pageParam - 1 })}
+                  disabled={!canPrev}
+                  aria-label="이전 페이지"
+                  title="이전"
+                >
+                  이전
+                </button>
+
+                <span className="muted" style={{ minWidth: 70, textAlign: "center" }}>
+                  {pageLabel}
+                </span>
+
+                <button
+                  className="btn"
+                  onClick={() => setListParams({ page: pageParam + 1 })}
+                  disabled={!canNext}
+                  aria-label="다음 페이지"
+                  title="다음"
+                >
+                  다음
+                </button>
+              </div>
             </div>
           </div>
 
