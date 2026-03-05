@@ -53,13 +53,14 @@ const SIZE_OPTIONS = [10, 20, 50] as const;
 const DEFAULT_SIZE = 20;
 
 const SORT_OPTIONS = [
-  { value: "id,desc", label: "임시ID 최신" },
   { value: "updatedAt,desc", label: "수정일 최신" },
   { value: "createdAt,desc", label: "생성일 최신" },
+  { value: "id,desc", label: "임시ID 최신" },
   { value: "title,asc", label: "제목 A→Z" },
 ] as const;
 
-const DEFAULT_SORT = "id,desc";
+// ✅ 기본 정렬: 수정일 최신
+const DEFAULT_SORT = "updatedAt,desc";
 
 function normalizeSize(n: number) {
   return (SIZE_OPTIONS as readonly number[]).includes(n) ? n : DEFAULT_SIZE;
@@ -196,98 +197,14 @@ export default function PostListPage() {
 
   return (
     <div>
-      {/* 상단 검색/액션 */}
-      <div className="card cardPad" style={{ marginBottom: 12 }}>
-        <div className="row" style={{ justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-          <div className="rowControls" style={{ flex: 1 }}>
-            <input
-              ref={inputRef}
-              className="input"
-              value={draftQ}
-              onChange={(e) => setDraftQ(e.target.value)}
-              placeholder="검색(제목/내용)"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") setListParams({ q: draftQ, page: 0 });
-                if (e.key === "Escape") clearSearch(true);
-              }}
-            />
-
-            {draftQ.trim().length > 0 && (
-              <button
-                type="button"
-                className="btn btnIcon"
-                title="검색어 지우기 (Esc)"
-                aria-label="검색어 지우기"
-                onClick={() => clearSearch(true)}
-                disabled={loading}
-              >
-                ✕
-              </button>
-            )}
-
-            <button className="btn btnPrimary" onClick={() => setListParams({ q: draftQ, page: 0 })} disabled={loading}>
-              검색
-            </button>
-          </div>
-
-          {/* 새 글 작성 */}
-          <Link to="/new" state={{ from }} className="btn">
-            새 글
-          </Link>
-        </div>
-
-        {/* 옵션 바 */}
-        <div
-          className="row"
-          style={{ marginTop: 10, justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}
-        >
-          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
-            <span className="pill">총 {totalCountText}개</span>
-            {qParam.trim() && <span className="pill">검색: {qParam.trim()}</span>}
-          </div>
-
-          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
-            <span className="muted" style={{ fontSize: 12 }}>
-              정렬
-            </span>
-            <select
-              className="select"
-              value={sortParam}
-              onChange={(e) => setListParams({ sort: e.target.value, page: 0 })}
-              disabled={loading}
-              style={{ width: 160 }}
-            >
-              {SORT_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-
-            <span className="muted" style={{ fontSize: 12 }}>
-              표시
-            </span>
-            <select
-              className="select"
-              value={String(sizeParam)}
-              onChange={(e) => setListParams({ size: Number(e.target.value), page: 0 })}
-              disabled={loading}
-              style={{ width: 120 }}
-            >
-              {SIZE_OPTIONS.map((n) => (
-                <option key={n} value={n}>
-                  {n}개
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="row" style={{ marginTop: 8, justifyContent: "flex-end" }}>
-          <span className="muted" style={{ fontSize: 12 }}>
-            검색/정렬/표시개수/페이지가 URL에 반영됩니다.
-          </span>
-        </div>
+      {/* ✅ 상단: 최소 헤더만 (검색 카드는 하단으로 이동) */}
+      <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <h2 className="pageTitle" style={{ margin: 0 }}>
+          게시글
+        </h2>
+        <Link to="/new" state={{ from }} className="btn">
+          새 글
+        </Link>
       </div>
 
       {/* 에러 */}
@@ -322,7 +239,6 @@ export default function PostListPage() {
       {!showLoadingFirst && !showEmpty && (
         <div className="postList">
           {(data?.items ?? []).map((p) => {
-            // 2순위에서 summary를 서버가 내려주면 여기가 진짜 미리보기로 채워짐
             const preview = String((p as any).summary ?? "").trim() || "…";
 
             return (
@@ -381,6 +297,95 @@ export default function PostListPage() {
         >
           다음
         </button>
+      </div>
+
+      {/* ✅ 하단: 검색/옵션 카드 */}
+      <div className="card cardPad" style={{ marginTop: 16 }}>
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+          <div className="rowControls" style={{ flex: 1 }}>
+            <input
+              ref={inputRef}
+              className="input"
+              value={draftQ}
+              onChange={(e) => setDraftQ(e.target.value)}
+              placeholder="검색(제목/내용)"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") setListParams({ q: draftQ, page: 0 });
+                if (e.key === "Escape") clearSearch(true);
+              }}
+            />
+
+            {draftQ.trim().length > 0 && (
+              <button
+                type="button"
+                className="btn btnIcon"
+                title="검색어 지우기 (Esc)"
+                aria-label="검색어 지우기"
+                onClick={() => clearSearch(true)}
+                disabled={loading}
+              >
+                ✕
+              </button>
+            )}
+
+            <button className="btn btnPrimary" onClick={() => setListParams({ q: draftQ, page: 0 })} disabled={loading}>
+              검색
+            </button>
+          </div>
+        </div>
+
+        {/* 옵션 바 */}
+        <div
+          className="row"
+          style={{ marginTop: 10, justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}
+        >
+          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+            <span className="pill">총 {totalCountText}개</span>
+            {qParam.trim() && <span className="pill">검색: {qParam.trim()}</span>}
+          </div>
+
+          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+            <span className="muted" style={{ fontSize: 12 }}>
+              정렬
+            </span>
+            <select
+              className="select"
+              value={sortParam}
+              onChange={(e) => setListParams({ sort: e.target.value, page: 0 })}
+              disabled={loading}
+              style={{ width: 160 }}
+            >
+              {SORT_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+
+            <span className="muted" style={{ fontSize: 12 }}>
+              표시
+            </span>
+            <select
+              className="select"
+              value={String(sizeParam)}
+              onChange={(e) => setListParams({ size: Number(e.target.value), page: 0 })}
+              disabled={loading}
+              style={{ width: 120 }}
+            >
+              {SIZE_OPTIONS.map((n) => (
+                <option key={n} value={n}>
+                  {n}개
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="row" style={{ marginTop: 8, justifyContent: "flex-end" }}>
+          <span className="muted" style={{ fontSize: 12 }}>
+            검색/정렬/표시개수/페이지가 URL에 반영됩니다.
+          </span>
+        </div>
       </div>
     </div>
   );
