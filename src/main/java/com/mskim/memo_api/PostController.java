@@ -52,15 +52,35 @@ public class PostController {
         }
     }
 
-    // 목록용 요약 DTO (content 제외)
-    public record PostSummaryRes(
-            Long id,
-            String title,
-            Instant createdAt,
-            Instant updatedAt
-    ) {
+    // 목록용 요약 DTO (content 전체 대신 summary 제공)
+        public record PostSummaryRes(
+                Long id,
+                String title,
+                String summary,
+                Instant createdAt,
+                Instant updatedAt
+        ) {
         static PostSummaryRes from(Post p) {
-            return new PostSummaryRes(p.getId(), p.getTitle(), p.getCreatedAt(), p.getUpdatedAt());
+            return new PostSummaryRes(
+                    p.getId(),
+                    p.getTitle(),
+                    summarize(p.getContent()),
+                    p.getCreatedAt(),
+                    p.getUpdatedAt()
+            );
+        }
+
+        static String summarize(String content) {
+            if (content == null) return "";
+            String s = content
+                    .replace("\r\n", "\n")
+                    .replace('\r', '\n')
+                    .replaceAll("\\s+", " ")
+                    .trim();
+
+            int limit = 120;
+            if (s.length() <= limit) return s;
+            return s.substring(0, limit).trim() + "…";
         }
     }
 
