@@ -11,6 +11,38 @@ function parseNonNegInt(v: string | null, fallback: number) {
   return i >= 0 ? i : fallback;
 }
 
+function escapeRegExp(s: string) {
+  // eslint-disable-next-line no-useless-escape
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlightText(text: string, query: string) {
+  const q = query.trim();
+  if (!q) return text;
+
+  const tokens = q
+    .split(/\s+/)
+    .map((t) => t.trim())
+    .filter(Boolean)
+    .slice(0, 5);
+
+  if (tokens.length === 0) return text;
+
+  const lowerTokens = tokens.map((t) => t.toLowerCase());
+  const re = new RegExp(`(${tokens.map(escapeRegExp).join("|")})`, "gi");
+  const parts = text.split(re);
+
+  return parts.map((part, idx) => {
+    const isHit = lowerTokens.includes(part.toLowerCase());
+    if (!isHit) return <span key={idx}>{part}</span>;
+    return (
+      <mark key={idx} className="hl">
+        {part}
+      </mark>
+    );
+  });
+}
+
 type ListState = {
   items: PostSummary[];
   totalPages: number;
@@ -38,7 +70,7 @@ export default function PostListPage() {
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // ✅ 마지막으로 본 목록 URL 저장(상세/작성에서 fallback용)
+  // ✅ 마지막으로 본 목록 URL 저장(상세/작성/수정에서 fallback용)
   useEffect(() => {
     rememberLastList(from);
   }, [from]);
@@ -110,7 +142,7 @@ export default function PostListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageParam, qParam]);
 
-  // ✅ 처음 로드가 끝난 뒤(데이터/에러가 확정된 뒤) 스크롤 복원 (내부 검색/페이지 이동에는 1회만)
+  // ✅ 처음 로드가 끝난 뒤(데이터/에러가 확정된 뒤) 스크롤 복원 (1회만)
   useEffect(() => {
     if (restoredRef.current) return;
     if (data || err) {
@@ -127,43 +159,48 @@ export default function PostListPage() {
 
   return (
     <div>
+      {/* 상단 검색/액션 */}
       <div className="card cardPad" style={{ marginBottom: 12 }}>
-        <div className="rowControls">
-          <input
-            ref={inputRef}
-            className="input"
-            value={draftQ}
-            onChange={(e) => setDraftQ(e.target.value)}
-            placeholder="검색(제목/내용)"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") setQueryPage(draftQ, 0);
-              if (e.key === "Escape") {
-                // draft만 지우지 말고, 실제 검색도 해제(UX 일관)
-                clearSearch(true);
-              }
-            }}
-          />
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+          <div className="rowControls" style={{ flex: 1 }}>
+            <input
+              ref={inputRef}
+              className="input"
+              value={draftQ}
+              onChange={(e) => setDraftQ(e.target.value)}
+              placeholder="검색(제목/내용)"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") setQueryPage(draftQ, 0);
+                if (e.key === "Escape") clearSearch(true);
+              }}
+            />
 
-          {draftQ.trim().length > 0 && (
-            <button
-              type="button"
-              className="btn btnIcon"
-              title="검색어 지우기 (Esc)"
-              aria-label="검색어 지우기"
-              onClick={() => clearSearch(true)}
-              disabled={loading}
-            >
-              ✕
+            {draftQ.trim().length > 0 && (
+              <button
+                type="button"
+                className="btn btnIcon"
+                title="검색어 지우기 (Esc)"
+                aria-label="검색어 지우기"
+                onClick={() => clearSearch(true)}
+                disabled={loading}
+              >
+                ✕
+              </button>
+            )}
+
+            <button className="btn btnPrimary" onClick={() => setQueryPage(draftQ, 0)} disabled={loading}>
+              검색
             </button>
-          )}
+          </div>
 
-          <button className="btn btnPrimary" onClick={() => setQueryPage(draftQ, 0)} disabled={loading}>
-            검색
-          </button>
+          {/* ✅ 항상 노출되는 새 글 작성 */}
+          <Link to="/new" state={{ from }} className="btn">
+            새 글
+          </Link>
         </div>
 
         <div className="row" style={{ marginTop: 10, justifyContent: "space-between" }}>
-          <div className="row" style={{ gap: 8 }}>
+          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
             <span className="pill">총 {totalCountText}개</span>
             {qParam.trim() && <span className="pill">검색: {qParam.trim()}</span>}
           </div>
@@ -173,12 +210,14 @@ export default function PostListPage() {
         </div>
       </div>
 
+      {/* 에러 */}
       {err && (
         <div className="error" style={{ marginBottom: 12 }}>
           {err}
         </div>
       )}
 
+      {/* 최초 로딩 */}
       {showLoadingFirst && (
         <div className="card cardPad emptyState" style={{ marginBottom: 12 }}>
           <div className="emptyTitle">불러오는 중…</div>
@@ -186,6 +225,7 @@ export default function PostListPage() {
         </div>
       )}
 
+      {/* 빈 상태 */}
       {showEmpty && (
         <div className="card cardPad emptyState" style={{ marginBottom: 12 }}>
           <div className="emptyTitle">게시글이 없습니다</div>
@@ -198,51 +238,54 @@ export default function PostListPage() {
         </div>
       )}
 
+      {/* 목록 (카드/프리뷰) */}
       {!showLoadingFirst && !showEmpty && (
-        <div className="tableWrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th style={{ width: 90 }}>ID</th>
-                <th>제목</th>
-                <th style={{ width: 220 }}>수정일</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(data?.items ?? []).map((p) => (
-                <tr
-                  key={p.id}
-                  className="tableRowClickable"
-                  onClick={() => navigate(`/posts/${p.id}`, { state: { from } })}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") navigate(`/posts/${p.id}`, { state: { from } });
-                  }}
-                  tabIndex={0}
-                  role="link"
-                  aria-label={`게시글 ${p.id} 열기`}
-                >
-                  <td className="mono">{p.id}</td>
-                  <td style={{ fontWeight: 600 }}>
-                    <Link to={`/posts/${p.id}`} state={{ from }} onClick={(e) => e.stopPropagation()}>
-                      {p.title}
-                    </Link>
-                  </td>
-                  <td className="muted">{formatDate(p.updatedAt)}</td>
-                </tr>
-              ))}
+        <div className="postList">
+          {(data?.items ?? []).map((p) => {
+            // summary/preview 필드가 프로젝트마다 다를 수 있어서 안전하게 any fallback
+            const preview: string =
+              String((p as any).summary ?? (p as any).preview ?? (p as any).contentPreview ?? "").trim() || "…";
 
-              {data && data.items.length === 0 && (
-                <tr>
-                  <td colSpan={3} className="muted">
-                    게시글이 없습니다.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+            return (
+              <article
+                key={p.id}
+                className="card cardPad postCard"
+                tabIndex={0}
+                role="link"
+                aria-label={`게시글 ${p.id} 열기`}
+                onClick={() => navigate(`/posts/${p.id}`, { state: { from } })}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") navigate(`/posts/${p.id}`, { state: { from } });
+                }}
+              >
+                <div className="postTop">
+                  <div className="postTitle">
+                    <Link
+                      to={`/posts/${p.id}`}
+                      state={{ from }}
+                      className="postTitleLink"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {highlightText(p.title, qParam)}
+                    </Link>
+                  </div>
+                  <span className="pill mono">임시ID #{p.id}</span>
+                </div>
+
+                <div className="postPreview">{highlightText(preview, qParam)}</div>
+
+                <div className="postMeta">
+                  <span className="muted">수정 {formatDate(p.updatedAt)}</span>
+                  <span className="muted">·</span>
+                  <span className="muted">클릭해서 열기</span>
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
 
+      {/* 페이지네이션 */}
       <div className="row" style={{ gap: 10, marginTop: 12 }}>
         <button
           className="btn"

@@ -129,7 +129,7 @@ export default function PostDetailPage() {
         <div className="muted" style={{ fontSize: 12 }}>
           생성: {formatDate(post.createdAt)} · 수정: {formatDate(post.updatedAt)}
         </div>
-        <span className="pill">#{post.id}</span>
+        <span className="pill mono">임시ID #{post.id}</span>
       </div>
 
       <div className="card cardPad">
