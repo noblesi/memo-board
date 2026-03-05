@@ -29,6 +29,8 @@
   --tableBg: rgba(255, 255, 255, 0.72);
   --tableRowHover: rgba(15, 23, 42, 0.04);
 
+  --dockBg: rgba(255, 255, 255, 0.55);
+
   /* ✅ 라이트/다크 공통 컴포넌트 색상(변수로만 사용) */
   --borderHover: rgba(15, 23, 42, 0.22);
   --pillBg: rgba(15, 23, 42, 0.06);
@@ -78,6 +80,8 @@
 
   --tableBg: rgba(0, 0, 0, 0.12);
   --tableRowHover: rgba(255, 255, 255, 0.05);
+
+  --dockBg: rgba(0, 0, 0, 0.35);
 
   /* ✅ 다크에서 기존 톤 유지 */
   --borderHover: rgba(255, 255, 255, 0.18);
@@ -494,7 +498,7 @@ a:hover {
   bottom: 0;
 
   /* 배경이 콘텐츠 위에 겹치므로 살짝 블러/반투명 느낌 */
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--dockBg);
   backdrop-filter: blur(6px);
 
   padding: 10px;
@@ -507,4 +511,21 @@ a:hover {
 
   /* 카드가 화면 가장자리까지 붙지 않게 */
   border-radius: 14px;
+}
+
+/* ✅ 드롭다운(옵션 팝업) 가독성: 항상 라이트(검은 글씨)로 통일 */
+:root {
+  --dropdownBg: #ffffff;
+  --dropdownText: #111111;
+}
+
+/* Windows/Chrome 네이티브 select 팝업이 테마를 안 따를 때 대비 확보 */
+.select {
+  color-scheme: light; /* 팝업을 라이트 스타일로 유도 */
+}
+
+.select option,
+.select optgroup {
+  background: var(--dropdownBg);
+  color: var(--dropdownText);
 }
