@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { listPosts } from "../lib/api";
 import { rememberLastList, restoreScroll, saveScroll } from "../lib/navMemory";
+import Dropdown, { type DropdownOption } from "../components/Dropdown";
 import type { PostSummary } from "../lib/api";
 
 function parseNonNegInt(v: string | null, fallback: number) {
@@ -52,7 +53,7 @@ type ListState = {
 const SIZE_OPTIONS = [10, 20, 50] as const;
 const DEFAULT_SIZE = 20;
 
-const SORT_OPTIONS = [
+const SORT_OPTIONS: readonly DropdownOption<string>[] = [
   { value: "updatedAt,desc", label: "수정일 최신" },
   { value: "createdAt,desc", label: "생성일 최신" },
   { value: "id,desc", label: "임시ID 최신" },
@@ -73,9 +74,11 @@ function normalizeSort(s: string) {
 export default function PostListPage() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // 목록 URL(검색/페이지/정렬/size 포함)을 상세/작성/수정으로 넘기기 위한 값
   const from = location.pathname + location.search;
 
-  // ✅ 이 페이지가 마운트될 때의 목록 URL(검색/페이지/정렬/size 포함)
+  // ✅ 이 페이지가 마운트될 때의 목록 URL(스크롤 복원 기준)
   const mountFromRef = useRef(from);
   const restoredRef = useRef(false);
 
@@ -87,18 +90,18 @@ export default function PostListPage() {
   const sizeParam = useMemo(() => normalizeSize(parseNonNegInt(sp.get("size"), DEFAULT_SIZE)), [sp]);
   const sortParam = useMemo(() => normalizeSort(sp.get("sort") ?? DEFAULT_SORT), [sp]);
 
-  // 입력 중인 검색어(즉시 URL에 반영하지 않고, "검색" 버튼 눌렀을 때 반영)
+  // 입력 중 검색어(draft)
   const [draftQ, setDraftQ] = useState(qParam);
   useEffect(() => setDraftQ(qParam), [qParam]);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // ✅ 마지막으로 본 목록 URL 저장(상세/작성/수정에서 fallback용)
+  // ✅ 마지막 목록 URL 기억(상세 새로고침 등에서 fallback)
   useEffect(() => {
     rememberLastList(from);
   }, [from]);
 
-  // ✅ 목록을 떠날 때(언마운트) 스크롤 위치 저장
+  // ✅ 목록 떠날 때 스크롤 저장
   useEffect(() => {
     return () => {
       saveScroll(from);
@@ -158,6 +161,7 @@ export default function PostListPage() {
     const size = normalizeSize(next.size ?? sizeParam);
     const sort = normalizeSort(next.sort ?? sortParam);
 
+    // URL에 항상 page/size/sort는 반영, q는 비면 제거
     const params: Record<string, string> = {
       page: String(page),
       size: String(size),
@@ -174,13 +178,13 @@ export default function PostListPage() {
     inputRef.current?.focus();
   }
 
-  // URL이 바뀌면 다시 로드
+  // URL이 바뀌면 다시 로드 (새로고침/뒤로가기/링크 공유 포함)
   useEffect(() => {
     load(pageParam, qParam, sizeParam, sortParam);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageParam, qParam, sizeParam, sortParam]);
 
-  // ✅ 첫 로드 후 스크롤 복원(1회)
+  // ✅ 첫 로드가 끝난 뒤(데이터/에러 확정) 스크롤 복원 (1회)
   useEffect(() => {
     if (restoredRef.current) return;
     if (data || err) {
@@ -195,6 +199,11 @@ export default function PostListPage() {
   const showLoadingFirst = loading && !data;
   const showEmpty = !loading && !!data && data.items.length === 0;
 
+  const sizeOptions: readonly DropdownOption<number>[] = useMemo(
+    () => SIZE_OPTIONS.map((n) => ({ value: n, label: `${n}개` })),
+    [],
+  );
+
   return (
     <div>
       {/* 상단: 최소 헤더 */}
@@ -208,7 +217,7 @@ export default function PostListPage() {
       </div>
 
       {/* 본문이 하단 고정 바에 가리지 않도록 패딩 확보 */}
-      <div style={{ paddingBottom: 160 }}>
+      <div style={{ paddingBottom: 170 }}>
         {err && (
           <div className="error" style={{ marginBottom: 12 }}>
             {err}
@@ -237,6 +246,7 @@ export default function PostListPage() {
         {!showLoadingFirst && !showEmpty && (
           <div className="postList">
             {(data?.items ?? []).map((p) => {
+              // 2순위(summary 필드) 붙이면 여기 미리보기가 실제로 채워짐
               const preview = String((p as any).summary ?? "").trim() || "…";
 
               return (
@@ -280,11 +290,7 @@ export default function PostListPage() {
 
         {/* 페이지네이션 */}
         <div className="row" style={{ gap: 10, marginTop: 12 }}>
-          <button
-            className="btn"
-            disabled={loading || pageParam <= 0}
-            onClick={() => setListParams({ page: pageParam - 1 })}
-          >
+          <button className="btn" disabled={loading || pageParam <= 0} onClick={() => setListParams({ page: pageParam - 1 })}>
             이전
           </button>
 
@@ -354,40 +360,34 @@ export default function PostListPage() {
               {qParam.trim() && <span className="pill">검색: {qParam.trim()}</span>}
             </div>
 
-            <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+            <div className="row" style={{ gap: 8, flexWrap: "wrap", alignItems: "center" }}>
               <span className="muted" style={{ fontSize: 12 }}>
                 정렬
               </span>
-              <select
-                className="select"
+              <Dropdown
                 value={sortParam}
-                onChange={(e) => setListParams({ sort: e.target.value, page: 0 })}
+                options={SORT_OPTIONS}
+                onChange={(v) => setListParams({ sort: v, page: 0 })}
                 disabled={loading}
-                style={{ width: 160 }}
-              >
-                {SORT_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
+                ariaLabel="정렬"
+                width={160}
+                direction="up"
+                align="right"
+              />
 
               <span className="muted" style={{ fontSize: 12 }}>
                 표시
               </span>
-              <select
-                className="select"
-                value={String(sizeParam)}
-                onChange={(e) => setListParams({ size: Number(e.target.value), page: 0 })}
+              <Dropdown
+                value={sizeParam}
+                options={sizeOptions}
+                onChange={(v) => setListParams({ size: v, page: 0 })}
                 disabled={loading}
-                style={{ width: 120 }}
-              >
-                {SIZE_OPTIONS.map((n) => (
-                  <option key={n} value={n}>
-                    {n}개
-                  </option>
-                ))}
-              </select>
+                ariaLabel="표시 개수"
+                width={120}
+                direction="up"
+                align="right"
+              />
             </div>
           </div>
 

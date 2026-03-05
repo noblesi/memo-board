@@ -31,6 +31,9 @@
 
   --dockBg: rgba(255, 255, 255, 0.55);
 
+  --dropdownSolidBg: #ffffff;
+  --dropdownSolidBorder: rgba(0, 0, 0, 0.12);
+
   /* ✅ 라이트/다크 공통 컴포넌트 색상(변수로만 사용) */
   --borderHover: rgba(15, 23, 42, 0.22);
   --pillBg: rgba(15, 23, 42, 0.06);
@@ -82,6 +85,9 @@
   --tableRowHover: rgba(255, 255, 255, 0.05);
 
   --dockBg: rgba(0, 0, 0, 0.35);
+
+  --dropdownSolidBg: #0b1220;
+  --dropdownSolidBorder: rgba(255, 255, 255, 0.12);
 
   /* ✅ 다크에서 기존 톤 유지 */
   --borderHover: rgba(255, 255, 255, 0.18);
@@ -528,4 +534,100 @@ a:hover {
 .select optgroup {
   background: var(--dropdownBg);
   color: var(--dropdownText);
+}
+
+/* Custom dropdown */
+.dd {
+  position: relative;
+  display: inline-block;
+}
+
+.ddBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  padding: 10px 12px;
+  border-radius: 12px;
+
+  background: var(--dropdownSolidBg);
+  color: var(--text);
+  border: 1px solid var(--dropdownSolidBorder);
+
+  cursor: pointer;
+}
+
+.ddBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ddBtnLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ddChevron {
+  opacity: 0.75;
+}
+
+.ddMenu {
+  position: absolute;
+  min-width: 100%;
+  max-height: 260px;
+  overflow: auto;
+
+  background: var(--dropdownSolidBg);
+  color: var(--text);
+  border: 1px solid var(--dropdownSolidBorder);
+  border-radius: 12px;
+
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  z-index: 100; /* bottomDock 위로 */
+}
+
+.ddMenu.down {
+  top: calc(100% + 8px);
+}
+
+.ddMenu.up {
+  bottom: calc(100% + 8px);
+}
+
+.ddMenu.left {
+  left: 0;
+}
+
+.ddMenu.right {
+  right: 0;
+}
+
+.ddItem {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+
+  background: transparent;
+  border: 0;
+  color: inherit;
+
+  cursor: pointer;
+}
+
+.ddItem:hover,
+.ddItem.active {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+:root:not([data-theme="dark"]) .ddItem:hover,
+:root:not([data-theme="dark"]) .ddItem.active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ddItem.selected {
+  font-weight: 700;
 }
