@@ -96,11 +96,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return text as unknown as T;
 }
 
-export function listPosts(params: { page?: number; size?: number; q?: string } = {}) {
+export function listPosts(params: { page?: number; size?: number; q?: string; sort?: string } = {}) {
   const usp = new URLSearchParams();
   if (params.page != null) usp.set("page", String(params.page));
   if (params.size != null) usp.set("size", String(params.size));
+  if (params.sort) usp.set("sort", params.sort);
   if (params.q) usp.set("q", params.q);
+  
   const qs = usp.toString();
   return request<PageRes<PostSummary>>(`/posts${qs ? `?${qs}` : ""}`);
 }

@@ -49,12 +49,32 @@ type ListState = {
   totalElements: number;
 };
 
+const SIZE_OPTIONS = [10, 20, 50] as const;
+const DEFAULT_SIZE = 20;
+
+const SORT_OPTIONS = [
+  { value: "id,desc", label: "임시ID 최신" },
+  { value: "updatedAt,desc", label: "수정일 최신" },
+  { value: "createdAt,desc", label: "생성일 최신" },
+  { value: "title,asc", label: "제목 A→Z" },
+] as const;
+
+const DEFAULT_SORT = "id,desc";
+
+function normalizeSize(n: number) {
+  return (SIZE_OPTIONS as readonly number[]).includes(n) ? n : DEFAULT_SIZE;
+}
+
+function normalizeSort(s: string) {
+  return SORT_OPTIONS.some((o) => o.value === s) ? s : DEFAULT_SORT;
+}
+
 export default function PostListPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.pathname + location.search;
 
-  // ✅ 이 페이지가 마운트될 때의 목록 URL(검색/페이지 포함)
+  // ✅ 이 페이지가 마운트될 때의 목록 URL(검색/페이지/정렬/size 포함)
   const mountFromRef = useRef(from);
   const restoredRef = useRef(false);
 
@@ -63,6 +83,8 @@ export default function PostListPage() {
   // URL -> 상태(소스오브트루스)
   const qParam = sp.get("q") ?? "";
   const pageParam = useMemo(() => parseNonNegInt(sp.get("page"), 0), [sp]);
+  const sizeParam = useMemo(() => normalizeSize(parseNonNegInt(sp.get("size"), DEFAULT_SIZE)), [sp]);
+  const sortParam = useMemo(() => normalizeSort(sp.get("sort") ?? DEFAULT_SORT), [sp]);
 
   // 입력 중인 검색어(즉시 URL에 반영하지 않고, "검색" 버튼 눌렀을 때 반영)
   const [draftQ, setDraftQ] = useState(qParam);
@@ -105,12 +127,18 @@ export default function PostListPage() {
     return dtf.format(d);
   }
 
-  async function load(p: number, query: string) {
+  async function load(p: number, query: string, size: number, sort: string) {
     setLoading(true);
     setErr(null);
     try {
       const trimmed = query.trim();
-      const res = await listPosts({ page: p, size: 20, q: trimmed ? trimmed : undefined });
+      const res = await listPosts({
+        page: p,
+        size,
+        sort,
+        q: trimmed ? trimmed : undefined,
+      });
+
       setData({
         items: res.items,
         totalPages: res.page.totalPages,
@@ -123,24 +151,33 @@ export default function PostListPage() {
     }
   }
 
-  function setQueryPage(nextQ: string, nextPage: number) {
-    const trimmed = nextQ.trim();
-    const next: Record<string, string> = { page: String(Math.max(0, nextPage)) };
-    if (trimmed) next.q = trimmed; // q가 비면 URL에서 제거
-    setSp(next);
+  function setListParams(next: Partial<{ q: string; page: number; size: number; sort: string }>) {
+    const q = (next.q ?? qParam).trim();
+    const page = Math.max(0, next.page ?? pageParam);
+    const size = normalizeSize(next.size ?? sizeParam);
+    const sort = normalizeSort(next.sort ?? sortParam);
+
+    const params: Record<string, string> = {
+      page: String(page),
+      size: String(size),
+      sort,
+    };
+    if (q) params.q = q;
+
+    setSp(params);
   }
 
   function clearSearch(apply = true) {
     setDraftQ("");
-    if (apply) setQueryPage("", 0);
+    if (apply) setListParams({ q: "", page: 0 });
     inputRef.current?.focus();
   }
 
   // URL이 바뀌면 다시 로드 (새로고침/뒤로가기/링크 공유 포함)
   useEffect(() => {
-    load(pageParam, qParam);
+    load(pageParam, qParam, sizeParam, sortParam);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageParam, qParam]);
+  }, [pageParam, qParam, sizeParam, sortParam]);
 
   // ✅ 처음 로드가 끝난 뒤(데이터/에러가 확정된 뒤) 스크롤 복원 (1회만)
   useEffect(() => {
@@ -170,7 +207,7 @@ export default function PostListPage() {
               onChange={(e) => setDraftQ(e.target.value)}
               placeholder="검색(제목/내용)"
               onKeyDown={(e) => {
-                if (e.key === "Enter") setQueryPage(draftQ, 0);
+                if (e.key === "Enter") setListParams({ q: draftQ, page: 0 });
                 if (e.key === "Escape") clearSearch(true);
               }}
             />
@@ -188,24 +225,67 @@ export default function PostListPage() {
               </button>
             )}
 
-            <button className="btn btnPrimary" onClick={() => setQueryPage(draftQ, 0)} disabled={loading}>
+            <button className="btn btnPrimary" onClick={() => setListParams({ q: draftQ, page: 0 })} disabled={loading}>
               검색
             </button>
           </div>
 
-          {/* ✅ 항상 노출되는 새 글 작성 */}
+          {/* 새 글 작성 */}
           <Link to="/new" state={{ from }} className="btn">
             새 글
           </Link>
         </div>
 
-        <div className="row" style={{ marginTop: 10, justifyContent: "space-between" }}>
+        {/* 옵션 바 */}
+        <div
+          className="row"
+          style={{ marginTop: 10, justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}
+        >
           <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
             <span className="pill">총 {totalCountText}개</span>
             {qParam.trim() && <span className="pill">검색: {qParam.trim()}</span>}
           </div>
+
+          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+            <span className="muted" style={{ fontSize: 12 }}>
+              정렬
+            </span>
+            <select
+              className="select"
+              value={sortParam}
+              onChange={(e) => setListParams({ sort: e.target.value, page: 0 })}
+              disabled={loading}
+              style={{ width: 160 }}
+            >
+              {SORT_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+
+            <span className="muted" style={{ fontSize: 12 }}>
+              표시
+            </span>
+            <select
+              className="select"
+              value={String(sizeParam)}
+              onChange={(e) => setListParams({ size: Number(e.target.value), page: 0 })}
+              disabled={loading}
+              style={{ width: 120 }}
+            >
+              {SIZE_OPTIONS.map((n) => (
+                <option key={n} value={n}>
+                  {n}개
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="row" style={{ marginTop: 8, justifyContent: "flex-end" }}>
           <span className="muted" style={{ fontSize: 12 }}>
-            검색/페이지가 URL에 반영됩니다.
+            검색/정렬/표시개수/페이지가 URL에 반영됩니다.
           </span>
         </div>
       </div>
@@ -238,13 +318,12 @@ export default function PostListPage() {
         </div>
       )}
 
-      {/* 목록 (카드/프리뷰) */}
+      {/* 목록(카드/프리뷰) */}
       {!showLoadingFirst && !showEmpty && (
         <div className="postList">
           {(data?.items ?? []).map((p) => {
-            // summary/preview 필드가 프로젝트마다 다를 수 있어서 안전하게 any fallback
-            const preview: string =
-              String((p as any).summary ?? (p as any).preview ?? (p as any).contentPreview ?? "").trim() || "…";
+            // 2순위에서 summary를 서버가 내려주면 여기가 진짜 미리보기로 채워짐
+            const preview = String((p as any).summary ?? "").trim() || "…";
 
             return (
               <article
@@ -287,11 +366,7 @@ export default function PostListPage() {
 
       {/* 페이지네이션 */}
       <div className="row" style={{ gap: 10, marginTop: 12 }}>
-        <button
-          className="btn"
-          disabled={loading || pageParam <= 0}
-          onClick={() => setQueryPage(qParam, pageParam - 1)}
-        >
+        <button className="btn" disabled={loading || pageParam <= 0} onClick={() => setListParams({ page: pageParam - 1 })}>
           이전
         </button>
 
@@ -302,7 +377,7 @@ export default function PostListPage() {
         <button
           className="btn"
           disabled={loading || (data ? pageParam >= totalPages - 1 : true)}
-          onClick={() => setQueryPage(qParam, pageParam + 1)}
+          onClick={() => setListParams({ page: pageParam + 1 })}
         >
           다음
         </button>
