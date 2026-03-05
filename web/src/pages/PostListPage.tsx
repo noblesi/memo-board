@@ -174,13 +174,13 @@ export default function PostListPage() {
     inputRef.current?.focus();
   }
 
-  // URL이 바뀌면 다시 로드 (새로고침/뒤로가기/링크 공유 포함)
+  // URL이 바뀌면 다시 로드
   useEffect(() => {
     load(pageParam, qParam, sizeParam, sortParam);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageParam, qParam, sizeParam, sortParam]);
 
-  // ✅ 처음 로드가 끝난 뒤(데이터/에러가 확정된 뒤) 스크롤 복원 (1회만)
+  // ✅ 첫 로드 후 스크롤 복원(1회)
   useEffect(() => {
     if (restoredRef.current) return;
     if (data || err) {
@@ -197,7 +197,7 @@ export default function PostListPage() {
 
   return (
     <div>
-      {/* ✅ 상단: 최소 헤더만 (검색 카드는 하단으로 이동) */}
+      {/* 상단: 최소 헤더 */}
       <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
         <h2 className="pageTitle" style={{ margin: 0 }}>
           게시글
@@ -207,184 +207,195 @@ export default function PostListPage() {
         </Link>
       </div>
 
-      {/* 에러 */}
-      {err && (
-        <div className="error" style={{ marginBottom: 12 }}>
-          {err}
-        </div>
-      )}
-
-      {/* 최초 로딩 */}
-      {showLoadingFirst && (
-        <div className="card cardPad emptyState" style={{ marginBottom: 12 }}>
-          <div className="emptyTitle">불러오는 중…</div>
-          <div className="muted">게시글 목록을 가져오고 있습니다.</div>
-        </div>
-      )}
-
-      {/* 빈 상태 */}
-      {showEmpty && (
-        <div className="card cardPad emptyState" style={{ marginBottom: 12 }}>
-          <div className="emptyTitle">게시글이 없습니다</div>
-          <div className="muted">첫 글을 작성해보세요.</div>
-          <div className="row" style={{ justifyContent: "center", marginTop: 12 }}>
-            <Link to="/new" state={{ from }} className="btn btnPrimary">
-              새 글 작성
-            </Link>
+      {/* 본문이 하단 고정 바에 가리지 않도록 패딩 확보 */}
+      <div style={{ paddingBottom: 160 }}>
+        {err && (
+          <div className="error" style={{ marginBottom: 12 }}>
+            {err}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* 목록(카드/프리뷰) */}
-      {!showLoadingFirst && !showEmpty && (
-        <div className="postList">
-          {(data?.items ?? []).map((p) => {
-            const preview = String((p as any).summary ?? "").trim() || "…";
+        {showLoadingFirst && (
+          <div className="card cardPad emptyState" style={{ marginBottom: 12 }}>
+            <div className="emptyTitle">불러오는 중…</div>
+            <div className="muted">게시글 목록을 가져오고 있습니다.</div>
+          </div>
+        )}
 
-            return (
-              <article
-                key={p.id}
-                className="card cardPad postCard"
-                tabIndex={0}
-                role="link"
-                aria-label={`게시글 ${p.id} 열기`}
-                onClick={() => navigate(`/posts/${p.id}`, { state: { from } })}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") navigate(`/posts/${p.id}`, { state: { from } });
-                }}
-              >
-                <div className="postTop">
-                  <div className="postTitle">
-                    <Link
-                      to={`/posts/${p.id}`}
-                      state={{ from }}
-                      className="postTitleLink"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {highlightText(p.title, qParam)}
-                    </Link>
+        {showEmpty && (
+          <div className="card cardPad emptyState" style={{ marginBottom: 12 }}>
+            <div className="emptyTitle">게시글이 없습니다</div>
+            <div className="muted">첫 글을 작성해보세요.</div>
+            <div className="row" style={{ justifyContent: "center", marginTop: 12 }}>
+              <Link to="/new" state={{ from }} className="btn btnPrimary">
+                새 글 작성
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {!showLoadingFirst && !showEmpty && (
+          <div className="postList">
+            {(data?.items ?? []).map((p) => {
+              const preview = String((p as any).summary ?? "").trim() || "…";
+
+              return (
+                <article
+                  key={p.id}
+                  className="card cardPad postCard"
+                  tabIndex={0}
+                  role="link"
+                  aria-label={`게시글 ${p.id} 열기`}
+                  onClick={() => navigate(`/posts/${p.id}`, { state: { from } })}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") navigate(`/posts/${p.id}`, { state: { from } });
+                  }}
+                >
+                  <div className="postTop">
+                    <div className="postTitle">
+                      <Link
+                        to={`/posts/${p.id}`}
+                        state={{ from }}
+                        className="postTitleLink"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {highlightText(p.title, qParam)}
+                      </Link>
+                    </div>
+                    <span className="pill mono">임시ID #{p.id}</span>
                   </div>
-                  <span className="pill mono">임시ID #{p.id}</span>
-                </div>
 
-                <div className="postPreview">{highlightText(preview, qParam)}</div>
+                  <div className="postPreview">{highlightText(preview, qParam)}</div>
 
-                <div className="postMeta">
-                  <span className="muted">수정 {formatDate(p.updatedAt)}</span>
-                  <span className="muted">·</span>
-                  <span className="muted">클릭해서 열기</span>
-                </div>
-              </article>
-            );
-          })}
+                  <div className="postMeta">
+                    <span className="muted">수정 {formatDate(p.updatedAt)}</span>
+                    <span className="muted">·</span>
+                    <span className="muted">클릭해서 열기</span>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+
+        {/* 페이지네이션 */}
+        <div className="row" style={{ gap: 10, marginTop: 12 }}>
+          <button
+            className="btn"
+            disabled={loading || pageParam <= 0}
+            onClick={() => setListParams({ page: pageParam - 1 })}
+          >
+            이전
+          </button>
+
+          <span className="muted">
+            {Math.min(pageParam + 1, totalPages)} / {totalPages}
+          </span>
+
+          <button
+            className="btn"
+            disabled={loading || (data ? pageParam >= totalPages - 1 : true)}
+            onClick={() => setListParams({ page: pageParam + 1 })}
+          >
+            다음
+          </button>
         </div>
-      )}
-
-      {/* 페이지네이션 */}
-      <div className="row" style={{ gap: 10, marginTop: 12 }}>
-        <button className="btn" disabled={loading || pageParam <= 0} onClick={() => setListParams({ page: pageParam - 1 })}>
-          이전
-        </button>
-
-        <span className="muted">
-          {Math.min(pageParam + 1, totalPages)} / {totalPages}
-        </span>
-
-        <button
-          className="btn"
-          disabled={loading || (data ? pageParam >= totalPages - 1 : true)}
-          onClick={() => setListParams({ page: pageParam + 1 })}
-        >
-          다음
-        </button>
       </div>
 
-      {/* ✅ 하단: 검색/옵션 카드 */}
-      <div className="card cardPad" style={{ marginTop: 16 }}>
-        <div className="row" style={{ justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-          <div className="rowControls" style={{ flex: 1 }}>
-            <input
-              ref={inputRef}
-              className="input"
-              value={draftQ}
-              onChange={(e) => setDraftQ(e.target.value)}
-              placeholder="검색(제목/내용)"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") setListParams({ q: draftQ, page: 0 });
-                if (e.key === "Escape") clearSearch(true);
-              }}
-            />
+      {/* ✅ 하단 고정 바 */}
+      <div className="bottomDock">
+        <div className="card cardPad bottomDockInner">
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+            <div className="rowControls" style={{ flex: 1 }}>
+              <input
+                ref={inputRef}
+                className="input"
+                value={draftQ}
+                onChange={(e) => setDraftQ(e.target.value)}
+                placeholder="검색(제목/내용)"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") setListParams({ q: draftQ, page: 0 });
+                  if (e.key === "Escape") clearSearch(true);
+                }}
+              />
 
-            {draftQ.trim().length > 0 && (
-              <button
-                type="button"
-                className="btn btnIcon"
-                title="검색어 지우기 (Esc)"
-                aria-label="검색어 지우기"
-                onClick={() => clearSearch(true)}
-                disabled={loading}
-              >
-                ✕
+              {draftQ.trim().length > 0 && (
+                <button
+                  type="button"
+                  className="btn btnIcon"
+                  title="검색어 지우기 (Esc)"
+                  aria-label="검색어 지우기"
+                  onClick={() => clearSearch(true)}
+                  disabled={loading}
+                >
+                  ✕
+                </button>
+              )}
+
+              <button className="btn btnPrimary" onClick={() => setListParams({ q: draftQ, page: 0 })} disabled={loading}>
+                검색
               </button>
-            )}
-
-            <button className="btn btnPrimary" onClick={() => setListParams({ q: draftQ, page: 0 })} disabled={loading}>
-              검색
-            </button>
-          </div>
-        </div>
-
-        {/* 옵션 바 */}
-        <div
-          className="row"
-          style={{ marginTop: 10, justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}
-        >
-          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
-            <span className="pill">총 {totalCountText}개</span>
-            {qParam.trim() && <span className="pill">검색: {qParam.trim()}</span>}
+            </div>
           </div>
 
-          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+          {/* 옵션 바 */}
+          <div
+            className="row"
+            style={{
+              marginTop: 10,
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 10,
+              flexWrap: "wrap",
+            }}
+          >
+            <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+              <span className="pill">총 {totalCountText}개</span>
+              {qParam.trim() && <span className="pill">검색: {qParam.trim()}</span>}
+            </div>
+
+            <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+              <span className="muted" style={{ fontSize: 12 }}>
+                정렬
+              </span>
+              <select
+                className="select"
+                value={sortParam}
+                onChange={(e) => setListParams({ sort: e.target.value, page: 0 })}
+                disabled={loading}
+                style={{ width: 160 }}
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+
+              <span className="muted" style={{ fontSize: 12 }}>
+                표시
+              </span>
+              <select
+                className="select"
+                value={String(sizeParam)}
+                onChange={(e) => setListParams({ size: Number(e.target.value), page: 0 })}
+                disabled={loading}
+                style={{ width: 120 }}
+              >
+                {SIZE_OPTIONS.map((n) => (
+                  <option key={n} value={n}>
+                    {n}개
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="row" style={{ marginTop: 8, justifyContent: "flex-end" }}>
             <span className="muted" style={{ fontSize: 12 }}>
-              정렬
+              검색/정렬/표시개수/페이지가 URL에 반영됩니다.
             </span>
-            <select
-              className="select"
-              value={sortParam}
-              onChange={(e) => setListParams({ sort: e.target.value, page: 0 })}
-              disabled={loading}
-              style={{ width: 160 }}
-            >
-              {SORT_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-
-            <span className="muted" style={{ fontSize: 12 }}>
-              표시
-            </span>
-            <select
-              className="select"
-              value={String(sizeParam)}
-              onChange={(e) => setListParams({ size: Number(e.target.value), page: 0 })}
-              disabled={loading}
-              style={{ width: 120 }}
-            >
-              {SIZE_OPTIONS.map((n) => (
-                <option key={n} value={n}>
-                  {n}개
-                </option>
-              ))}
-            </select>
           </div>
-        </div>
-
-        <div className="row" style={{ marginTop: 8, justifyContent: "flex-end" }}>
-          <span className="muted" style={{ fontSize: 12 }}>
-            검색/정렬/표시개수/페이지가 URL에 반영됩니다.
-          </span>
         </div>
       </div>
     </div>

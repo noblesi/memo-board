@@ -485,3 +485,26 @@ a:hover {
   opacity: 0.7;
   cursor: not-allowed;
 }
+
+/* Bottom dock (sticky) */
+.bottomDock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  /* 배경이 콘텐츠 위에 겹치므로 살짝 블러/반투명 느낌 */
+  background: rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(6px);
+
+  padding: 10px;
+  z-index: 50;
+}
+
+.bottomDockInner {
+  max-width: 980px;
+  margin: 0 auto;
+
+  /* 카드가 화면 가장자리까지 붙지 않게 */
+  border-radius: 14px;
+}
