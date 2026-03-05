@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { deletePost, getPost } from "../lib/api";
+import { getLastList } from "../lib/navMemory";
 import type { Post } from "../lib/api";
 
 type Flash = { type: "success" | "error"; message: string };
@@ -13,7 +14,7 @@ export default function PostDetailPage() {
 
   const nav = useNavigate();
   const location = useLocation();
-  const backTo = (location.state as NavState | null)?.from ?? "/";
+  const backTo = (location.state as NavState | null)?.from ?? getLastList("/");
 
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(false);

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { ApiError, createPost, getPost, updatePost } from "../lib/api";
+import { getLastList } from "../lib/navMemory";
 
 const TITLE_MAX = 100;
 const CONTENT_MAX = 5000;
@@ -16,6 +17,7 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
   const nav = useNavigate();
   const location = useLocation();
   const from = (location.state as NavState | null)?.from;
+  const listBack = from ?? getLastList("/");
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -124,7 +126,7 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
         const p = await createPost(payload);
         nav(`/posts/${p.id}`, {
           state: {
-            from,
+            from: listBack,
             flash: { type: "success", message: "작성되었습니다." },
           } satisfies NavState,
         });
@@ -137,7 +139,7 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
         const p = await updatePost(postId, payload);
         nav(`/posts/${p.id}`, {
           state: {
-            from,
+            from: listBack,
             flash: { type: "success", message: "저장되었습니다." },
           } satisfies NavState,
         });
@@ -163,7 +165,7 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
     return <div className="error">잘못된 접근입니다.</div>;
   }
 
-  const cancelTo = mode === "create" ? from ?? "/" : `/posts/${postId}`;
+  const cancelTo = mode === "create" ? listBack : `/posts/${postId}`;
 
   function onCancelClick(e: React.MouseEvent) {
     if (saving) {
@@ -194,7 +196,7 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
           <div className="emptyTitle">불러오는 중…</div>
           <div className="muted">게시글 내용을 가져오고 있습니다.</div>
           <div className="row" style={{ justifyContent: "center", marginTop: 12 }}>
-            <Link className="btn btnLink" to={cancelTo}>
+            <Link className="btn btnLink" to={cancelTo} state={{ from: listBack }}>
               돌아가기
             </Link>
           </div>
@@ -240,7 +242,12 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
                 {saving ? (mode === "create" ? "작성 중…" : "저장 중…") : mode === "create" ? "작성" : "저장"}
               </button>
 
-              <Link className={`btn btnLink ${saving ? "isDisabled" : ""}`} to={cancelTo} onClick={onCancelClick}>
+              <Link
+                className={`btn btnLink ${saving ? "isDisabled" : ""}`}
+                to={cancelTo}
+                state={{ from: listBack }}
+                onClick={onCancelClick}
+              >
                 취소
               </Link>
 

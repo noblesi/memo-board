@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { listPosts } from "../lib/api";
+import { rememberLastList, restoreScroll, saveScroll } from "../lib/navMemory";
 import type { PostSummary } from "../lib/api";
 
 function parseNonNegInt(v: string | null, fallback: number) {
@@ -21,6 +22,10 @@ export default function PostListPage() {
   const location = useLocation();
   const from = location.pathname + location.search;
 
+  // ✅ 이 페이지가 마운트될 때의 목록 URL(검색/페이지 포함)
+  const mountFromRef = useRef(from);
+  const restoredRef = useRef(false);
+
   const [sp, setSp] = useSearchParams();
 
   // URL -> 상태(소스오브트루스)
@@ -32,6 +37,18 @@ export default function PostListPage() {
   useEffect(() => setDraftQ(qParam), [qParam]);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // ✅ 마지막으로 본 목록 URL 저장(상세/작성에서 fallback용)
+  useEffect(() => {
+    rememberLastList(from);
+  }, [from]);
+
+  // ✅ 목록을 떠날 때(언마운트) 스크롤 위치 저장
+  useEffect(() => {
+    return () => {
+      saveScroll(from);
+    };
+  }, [from]);
 
   const [data, setData] = useState<ListState | null>(null);
   const [loading, setLoading] = useState(false);
@@ -92,6 +109,15 @@ export default function PostListPage() {
     load(pageParam, qParam);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageParam, qParam]);
+
+  // ✅ 처음 로드가 끝난 뒤(데이터/에러가 확정된 뒤) 스크롤 복원 (내부 검색/페이지 이동에는 1회만)
+  useEffect(() => {
+    if (restoredRef.current) return;
+    if (data || err) {
+      restoreScroll(mountFromRef.current);
+      restoredRef.current = true;
+    }
+  }, [data, err]);
 
   const totalPages = Math.max(1, data?.totalPages ?? 1);
   const totalCountText = loading && !data ? "…" : String(data?.totalElements ?? 0);
