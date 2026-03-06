@@ -12,37 +12,6 @@ function parseNonNegInt(v: string | null, fallback: number) {
   return i >= 0 ? i : fallback;
 }
 
-function escapeRegExp(s: string) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function highlightText(text: string, query: string) {
-  const q = query.trim();
-  if (!q) return text;
-
-  const tokens = q
-    .split(/\s+/)
-    .map((t) => t.trim())
-    .filter(Boolean)
-    .slice(0, 5);
-
-  if (tokens.length === 0) return text;
-
-  const lowerTokens = tokens.map((t) => t.toLowerCase());
-  const re = new RegExp(`(${tokens.map(escapeRegExp).join("|")})`, "gi");
-  const parts = text.split(re);
-
-  return parts.map((part, idx) => {
-    const isHit = lowerTokens.includes(part.toLowerCase());
-    if (!isHit) return <span key={idx}>{part}</span>;
-    return (
-      <mark key={idx} className="hl">
-        {part}
-      </mark>
-    );
-  });
-}
-
 type ListState = {
   items: PostSummary[];
   totalPages: number;
@@ -69,6 +38,29 @@ function normalizeSort(s: string) {
   return SORT_OPTIONS.some((o) => o.value === s) ? s : DEFAULT_SORT;
 }
 
+function formatUpdatedAt(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.valueOf())) return iso;
+
+  const now = new Date();
+  const diffMs = now.getTime() - d.getTime();
+  const oneDay = 24 * 60 * 60 * 1000;
+
+  if (diffMs < oneDay) {
+    return new Intl.DateTimeFormat("ko-KR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(d);
+  }
+
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
 export default function PostListPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -81,7 +73,10 @@ export default function PostListPage() {
 
   const qParam = sp.get("q") ?? "";
   const pageParam = useMemo(() => parseNonNegInt(sp.get("page"), 0), [sp]);
-  const sizeParam = useMemo(() => normalizeSize(parseNonNegInt(sp.get("size"), DEFAULT_SIZE)), [sp]);
+  const sizeParam = useMemo(
+    () => normalizeSize(parseNonNegInt(sp.get("size"), DEFAULT_SIZE)),
+    [sp],
+  );
   const sortParam = useMemo(() => normalizeSort(sp.get("sort") ?? DEFAULT_SORT), [sp]);
 
   const [draftQ, setDraftQ] = useState(qParam);
@@ -91,7 +86,9 @@ export default function PostListPage() {
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => setDraftQ(qParam), [qParam]);
+  useEffect(() => {
+    setDraftQ(qParam);
+  }, [qParam]);
 
   useEffect(() => {
     rememberLastList(from);
@@ -102,25 +99,6 @@ export default function PostListPage() {
       saveScroll(from);
     };
   }, [from]);
-
-  const dtf = useMemo(
-    () =>
-      new Intl.DateTimeFormat("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      }),
-    [],
-  );
-
-  function formatDate(iso: string) {
-    const d = new Date(iso);
-    if (Number.isNaN(d.valueOf())) return iso;
-    return dtf.format(d);
-  }
 
   async function load(p: number, query: string, size: number, sort: string) {
     setLoading(true);
@@ -209,11 +187,14 @@ export default function PostListPage() {
 
   return (
     <div>
-      <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+      <div
+        className="row"
+        style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}
+      >
         <h2 className="pageTitle" style={{ margin: 0 }}>
           게시글
         </h2>
-        <Link to="/new" state={{ from }} className="btn">
+        <Link to="/new" state={{ from }} className="btn btnPrimary">
           새 글
         </Link>
       </div>
@@ -224,7 +205,11 @@ export default function PostListPage() {
             <div className="emptyTitle">목록을 불러오지 못했습니다</div>
             <div className="muted">{err}</div>
             <div className="row" style={{ justifyContent: "center", marginTop: 12 }}>
-              <button className="btn btnPrimary" onClick={() => load(pageParam, qParam, sizeParam, sortParam)} disabled={loading}>
+              <button
+                className="btn btnPrimary"
+                onClick={() => load(pageParam, qParam, sizeParam, sortParam)}
+                disabled={loading}
+              >
                 다시 시도
               </button>
             </div>
@@ -240,12 +225,19 @@ export default function PostListPage() {
 
         {showEmpty && (
           <div className="card cardPad emptyState" style={{ marginBottom: 12 }}>
-            <div className="emptyTitle">{hasQuery ? "검색 결과가 없습니다" : "게시글이 없습니다"}</div>
+            <div className="emptyTitle">
+              {hasQuery ? "검색 결과가 없습니다" : "게시글이 없습니다"}
+            </div>
             <div className="muted">
-              {hasQuery ? `“${qParam.trim()}”에 대한 결과를 찾지 못했습니다.` : "첫 글을 작성해보세요."}
+              {hasQuery
+                ? `“${qParam.trim()}”에 대한 결과를 찾지 못했습니다.`
+                : "첫 글을 작성해보세요."}
             </div>
 
-            <div className="row" style={{ justifyContent: "center", marginTop: 12, flexWrap: "wrap" }}>
+            <div
+              className="row"
+              style={{ justifyContent: "center", marginTop: 12, flexWrap: "wrap" }}
+            >
               {hasQuery ? (
                 <>
                   <button className="btn" onClick={() => clearSearch(true)}>
@@ -267,12 +259,12 @@ export default function PostListPage() {
         {!showLoadingFirst && !showEmpty && (
           <div className="postList">
             {(data?.items ?? []).map((p) => {
-              const preview = String((p as any).summary ?? "").trim() || "…";
+              const author = (p as any).author ?? (p as any).authorName ?? "";
 
               return (
                 <article
                   key={p.id}
-                  className="card cardPad postCard"
+                  className="card cardPad postCard postCardCompact"
                   tabIndex={0}
                   role="link"
                   aria-label={`게시글 ${p.id} 열기`}
@@ -284,26 +276,20 @@ export default function PostListPage() {
                     }
                   }}
                 >
-                  <div className="postTop">
-                    <div className="postTitle">
-                      <Link
-                        to={`/posts/${p.id}`}
-                        state={{ from }}
-                        className="postTitleLink"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {highlightText(p.title, qParam)}
-                      </Link>
-                    </div>
-                    <span className="pill mono">임시ID #{p.id}</span>
+                  <div className="postCardMain">
+                    <Link
+                      to={`/posts/${p.id}`}
+                      state={{ from }}
+                      className="postTitleOnly"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {p.title}
+                    </Link>
                   </div>
 
-                  <div className="postPreview">{highlightText(preview, qParam)}</div>
-
-                  <div className="postMeta">
-                    <span className="muted">수정 {formatDate(p.updatedAt)}</span>
-                    <span className="muted">·</span>
-                    <span className="muted">클릭해서 열기</span>
+                  <div className="postCardSide">
+                    {author ? <div className="postSideAuthor">{author}</div> : null}
+                    <div className="postSideTime">{formatUpdatedAt(p.updatedAt)}</div>
                   </div>
                 </article>
               );
@@ -314,7 +300,10 @@ export default function PostListPage() {
 
       <div className="bottomDock">
         <div className="card cardPad bottomDockInner">
-          <div className="row" style={{ justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+          <div
+            className="row"
+            style={{ justifyContent: "space-between", alignItems: "center", gap: 10 }}
+          >
             <div className="rowControls" style={{ flex: 1 }}>
               <input
                 ref={inputRef}
@@ -341,7 +330,12 @@ export default function PostListPage() {
                 </button>
               )}
 
-              <button type="button" className="btn btnPrimary" onClick={() => setListParams({ q: draftQ, page: 0 })} disabled={loading}>
+              <button
+                type="button"
+                className="btn btnPrimary"
+                onClick={() => setListParams({ q: draftQ, page: 0 })}
+                disabled={loading}
+              >
                 검색
               </button>
             </div>
@@ -352,7 +346,9 @@ export default function PostListPage() {
               <span className="pill">총 {totalCountText}개</span>
               {hasQuery && <span className="pill">검색: {qParam.trim()}</span>}
             </div>
-            <span className="muted dockHint">검색/정렬/표시개수/페이지가 URL에 반영됩니다.</span>
+            <span className="muted dockHint">
+              검색/정렬/표시개수/페이지가 URL에 반영됩니다.
+            </span>
           </div>
 
           <div className="dockControlRow">
@@ -390,43 +386,31 @@ export default function PostListPage() {
                 className="btn"
                 onClick={() => setListParams({ page: 0 })}
                 disabled={!canPrev}
-                aria-label="첫 페이지"
-                title="첫 페이지"
               >
                 처음
               </button>
-
               <button
                 type="button"
                 className="btn"
                 onClick={() => setListParams({ page: pageParam - 1 })}
                 disabled={!canPrev}
-                aria-label="이전 페이지"
-                title="이전"
               >
                 이전
               </button>
-
               <span className="muted dockPageLabel">{pageLabel}</span>
-
               <button
                 type="button"
                 className="btn"
                 onClick={() => setListParams({ page: pageParam + 1 })}
                 disabled={!canNext}
-                aria-label="다음 페이지"
-                title="다음"
               >
                 다음
               </button>
-
               <button
                 type="button"
                 className="btn"
                 onClick={() => setListParams({ page: totalPages - 1 })}
                 disabled={!canNext}
-                aria-label="마지막 페이지"
-                title="마지막 페이지"
               >
                 마지막
               </button>

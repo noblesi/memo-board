@@ -86,15 +86,28 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
     const contentTooLong = c.length > CONTENT_MAX;
 
     const canSubmit =
-      !titleBlank && !contentBlank && !titleTooLong && !contentTooLong && !saving && !loading;
+      !titleBlank &&
+      !contentBlank &&
+      !titleTooLong &&
+      !contentTooLong &&
+      !saving &&
+      !loading;
 
     const titleMsg =
       fieldErrs.title ??
-      (titleBlank ? "제목을 입력하세요." : titleTooLong ? `제목은 ${TITLE_MAX}자 이하여야 합니다.` : "");
+      (titleBlank
+        ? "제목을 입력하세요."
+        : titleTooLong
+          ? `제목은 ${TITLE_MAX}자 이하여야 합니다.`
+          : "");
 
     const contentMsg =
       fieldErrs.content ??
-      (contentBlank ? "내용을 입력하세요." : contentTooLong ? `내용은 ${CONTENT_MAX}자 이하여야 합니다.` : "");
+      (contentBlank
+        ? "내용을 입력하세요."
+        : contentTooLong
+          ? `내용은 ${CONTENT_MAX}자 이하여야 합니다.`
+          : "");
 
     return {
       canSubmit,
@@ -183,29 +196,6 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
     if (!ok) e.preventDefault();
   }
 
-  function renderActions() {
-    return (
-      <div className="editActions">
-        <button className="btn btnPrimary" disabled={!ui.canSubmit} type="submit">
-          {saving ? (mode === "create" ? "작성 중…" : "저장 중…") : mode === "create" ? "작성" : "저장"}
-        </button>
-
-        <Link
-          className={`btn btnLink ${saving ? "isDisabled" : ""}`}
-          to={cancelTo}
-          state={cancelState}
-          onClick={onCancelClick}
-        >
-          취소
-        </Link>
-
-        <div className="spacer" />
-
-        <span className="editActionHint">서버 검증 에러는 필드별로 표시됩니다.</span>
-      </div>
-    );
-  }
-
   if (mode === "edit" && !isValidId) {
     return <div className="error">잘못된 접근입니다.</div>;
   }
@@ -222,7 +212,9 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
       <div className="editTitleRow">
         <div>
           <div className="editEyebrow">{mode === "create" ? "Create Post" : "Edit Post"}</div>
-          <h2 className="pageTitle editPageTitle">{mode === "create" ? "새 글 작성" : "게시글 수정"}</h2>
+          <h2 className="pageTitle editPageTitle">
+            {mode === "create" ? "새 글 작성" : "게시글 수정"}
+          </h2>
         </div>
       </div>
 
@@ -246,15 +238,19 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
         <form className="editShell" onSubmit={onSubmit} aria-busy={saving}>
           {saving && (
             <div className="card cardPad editSavingBanner">
-              <div className="editSavingTitle">{mode === "create" ? "작성 중…" : "저장 중…"}</div>
-              <div className="muted">잠시만 기다려주세요. 처리 중에는 다른 동작이 잠깁니다.</div>
+              <div className="editSavingTitle">
+                {mode === "create" ? "작성 중…" : "저장 중…"}
+              </div>
+              <div className="muted">잠시만 기다려주세요.</div>
             </div>
           )}
 
           <section className="card cardPad editCard">
             <div className="editSectionTop">
               <div className="editSectionTitle">기본 정보</div>
-              <div className="editSectionDesc">제목은 목록과 상세 페이지에서 가장 먼저 보이는 정보입니다.</div>
+              <div className="editSectionDesc">
+                제목은 목록과 상세 페이지에서 가장 먼저 보이는 정보입니다.
+              </div>
             </div>
 
             <label className="editField">
@@ -268,7 +264,9 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
                 disabled={saving}
               />
               <div className="editFieldMeta">
-                <span className={ui.titleMsg ? "fieldErrorText" : "muted"}>{ui.titleMsg || "한눈에 내용을 알 수 있게 작성하세요."}</span>
+                <span className={ui.titleMsg ? "fieldErrorText" : "muted"}>
+                  {ui.titleMsg || "한눈에 내용을 알 수 있게 작성하세요."}
+                </span>
                 <span className={ui.titleTooLong ? "fieldErrorText" : "muted"}>
                   {title.length}/{TITLE_MAX}
                 </span>
@@ -279,7 +277,9 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
           <section className="card cardPad editCard">
             <div className="editSectionTop">
               <div className="editSectionTitle">본문</div>
-              <div className="editSectionDesc">줄바꿈은 그대로 저장되며, 상세 페이지에서 읽기 편하게 표시됩니다.</div>
+              <div className="editSectionDesc">
+                줄바꿈은 그대로 저장되며, 상세 페이지에서 읽기 편하게 표시됩니다.
+              </div>
             </div>
 
             <label className="editField">
@@ -326,8 +326,26 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
             </div>
           </section>
 
-          {renderActions()}
-          <div className="editFooterActions">{renderActions()}</div>
+          <div className="editActions">
+            <button className="btn btnPrimary" disabled={!ui.canSubmit} type="submit">
+              {saving
+                ? mode === "create"
+                  ? "작성 중…"
+                  : "저장 중…"
+                : mode === "create"
+                  ? "작성"
+                  : "저장"}
+            </button>
+
+            <Link
+              className={`btn btnLink ${saving ? "isDisabled" : ""}`}
+              to={cancelTo}
+              state={cancelState}
+              onClick={onCancelClick}
+            >
+              취소
+            </Link>
+          </div>
         </form>
       )}
     </div>
