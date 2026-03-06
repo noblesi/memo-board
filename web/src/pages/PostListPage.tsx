@@ -237,9 +237,6 @@ export default function PostListPage() {
                   <button className="btn" onClick={() => clearSearch(true)}>
                     검색 초기화
                   </button>
-                  <Link to="/new" state={{ from }} className="btn btnPrimary">
-                    새 글 작성
-                  </Link>
                 </>
               ) : (
                 <Link to="/new" state={{ from }} className="btn btnPrimary">
