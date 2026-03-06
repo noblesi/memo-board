@@ -745,3 +745,177 @@ a:hover {
     display: none;
   }
 }
+
+.editHeaderBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.editTitleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.editEyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.editPageTitle {
+  margin-bottom: 0;
+}
+
+.editShell {
+  display: grid;
+  gap: 14px;
+  max-width: 760px;
+}
+
+.editCard {
+  display: grid;
+  gap: 14px;
+}
+
+.editSectionTop {
+  display: grid;
+  gap: 4px;
+}
+
+.editSectionTitle {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.editSectionDesc {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.editField {
+  display: grid;
+  gap: 8px;
+}
+
+.editLabel {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.editTextarea {
+  min-height: 280px;
+  line-height: 1.7;
+}
+
+.editFieldMeta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.fieldErrorText {
+  color: var(--danger);
+}
+
+.inputInvalid {
+  border-color: rgba(255, 92, 122, 0.45);
+}
+
+.inputInvalid:focus {
+  border-color: rgba(255, 92, 122, 0.6);
+  box-shadow: 0 0 0 3px rgba(255, 92, 122, 0.16);
+}
+
+.editSavingBanner {
+  display: grid;
+  gap: 4px;
+}
+
+.editSavingTitle {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.editSummaryCard {
+  display: grid;
+  gap: 10px;
+}
+
+.editSummaryTitle {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.editSummaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.editSummaryItem {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.editSummaryLabel {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.editSummaryValue {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.editActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.editActionHint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.editFooterActions {
+  margin-top: -4px;
+}
+
+@media (max-width: 720px) {
+  .editSummaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .editFieldMeta {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .editActions {
+    align-items: stretch;
+  }
+
+  .editActions .btn {
+    justify-content: center;
+  }
+
+  .editActions .spacer {
+    display: none;
+  }
+}

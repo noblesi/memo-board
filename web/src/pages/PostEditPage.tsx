@@ -22,23 +22,20 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  // ✅ 미저장(Dirty) 판단용 초기값
   const [initialTitle, setInitialTitle] = useState("");
   const [initialContent, setInitialContent] = useState("");
 
-  const [loading, setLoading] = useState(false); // edit 로드
-  const [saving, setSaving] = useState(false); // submit
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [fieldErrs, setFieldErrs] = useState<Record<string, string>>({});
 
-  // create 모드 초기값 세팅
   useEffect(() => {
     if (mode !== "create") return;
     setInitialTitle("");
     setInitialContent("");
   }, [mode]);
 
-  // edit 모드면 기존 글 로드
   useEffect(() => {
     if (mode !== "edit") return;
 
@@ -54,8 +51,6 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
       .then((p) => {
         setTitle(p.title);
         setContent(p.content);
-
-        // ✅ 로드된 시점의 값을 초기값으로 고정
         setInitialTitle(p.title);
         setInitialContent(p.content);
       })
@@ -64,18 +59,16 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
   }, [mode, postId, isValidId]);
 
   const dirty = useMemo(() => {
-    // loading 중에는 경고 과민 반응 방지
     if (loading) return false;
     return title !== initialTitle || content !== initialContent;
   }, [title, content, initialTitle, initialContent, loading]);
 
-  // ✅ 새로고침/탭닫기/브라우저 종료 시 경고
   useEffect(() => {
     if (!dirty || saving) return;
 
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
-      e.returnValue = ""; // Chrome/Edge에서 경고 트리거
+      e.returnValue = "";
       return "";
     };
 
@@ -83,7 +76,6 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [dirty, saving]);
 
-  // 클라이언트 검증 + 안내 문구
   const ui = useMemo(() => {
     const t = title;
     const c = content;
@@ -93,25 +85,38 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
     const titleTooLong = t.length > TITLE_MAX;
     const contentTooLong = c.length > CONTENT_MAX;
 
-    const canSubmit = !titleBlank && !contentBlank && !titleTooLong && !contentTooLong && !saving && !loading;
+    const canSubmit =
+      !titleBlank && !contentBlank && !titleTooLong && !contentTooLong && !saving && !loading;
 
     const titleMsg =
       fieldErrs.title ??
       (titleBlank ? "제목을 입력하세요." : titleTooLong ? `제목은 ${TITLE_MAX}자 이하여야 합니다.` : "");
+
     const contentMsg =
       fieldErrs.content ??
       (contentBlank ? "내용을 입력하세요." : contentTooLong ? `내용은 ${CONTENT_MAX}자 이하여야 합니다.` : "");
 
-    return { canSubmit, titleMsg, contentMsg, titleTooLong, contentTooLong };
+    return {
+      canSubmit,
+      titleMsg,
+      contentMsg,
+      titleTooLong,
+      contentTooLong,
+      titleBlank,
+      contentBlank,
+    };
   }, [title, content, fieldErrs, saving, loading]);
 
-  async function onSubmit() {
+  const cancelTo = mode === "create" ? listBack : `/posts/${postId}`;
+  const cancelState = mode === "create" ? undefined : { from: listBack };
+
+  async function onSubmit(e?: React.FormEvent) {
+    e?.preventDefault();
     if (saving) return;
 
     setErr(null);
     setFieldErrs({});
 
-    // 프론트에서 1차 차단
     if (!ui.canSubmit) {
       setErr("입력값을 확인해주세요.");
       return;
@@ -120,7 +125,10 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
     setSaving(true);
 
     try {
-      const payload = { title: title.trim(), content: content.trim() };
+      const payload = {
+        title: title.trim(),
+        content: content.trim(),
+      };
 
       if (mode === "create") {
         const p = await createPost(payload);
@@ -130,26 +138,28 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
             flash: { type: "success", message: "작성되었습니다." },
           } satisfies NavState,
         });
-      } else {
-        if (!isValidId) {
-          setErr("잘못된 접근입니다.");
-          setSaving(false);
-          return;
-        }
-        const p = await updatePost(postId, payload);
-        nav(`/posts/${p.id}`, {
-          state: {
-            from: listBack,
-            flash: { type: "success", message: "저장되었습니다." },
-          } satisfies NavState,
-        });
+        return;
       }
+
+      if (!isValidId) {
+        setErr("잘못된 접근입니다.");
+        setSaving(false);
+        return;
+      }
+
+      const p = await updatePost(postId, payload);
+      nav(`/posts/${p.id}`, {
+        state: {
+          from: listBack,
+          flash: { type: "success", message: "저장되었습니다." },
+        } satisfies NavState,
+      });
     } catch (e: unknown) {
       if (e instanceof ApiError) {
         if (e.fieldErrors?.length) {
-          const m: Record<string, string> = {};
-          for (const fe of e.fieldErrors) m[fe.field] = fe.message;
-          setFieldErrs(m);
+          const next: Record<string, string> = {};
+          for (const fe of e.fieldErrors) next[fe.field] = fe.message;
+          setFieldErrs(next);
         }
         setErr(e.message);
         setSaving(false);
@@ -161,28 +171,59 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
     }
   }
 
-  if (mode === "edit" && !isValidId) {
-    return <div className="error">잘못된 접근입니다.</div>;
-  }
-
-  const cancelTo = mode === "create" ? listBack : `/posts/${postId}`;
-
   function onCancelClick(e: React.MouseEvent) {
     if (saving) {
       e.preventDefault();
       return;
     }
+
     if (!dirty) return;
 
     const ok = confirm("저장되지 않은 변경사항이 있습니다. 정말 나갈까요?");
     if (!ok) e.preventDefault();
   }
 
+  function renderActions() {
+    return (
+      <div className="editActions">
+        <button className="btn btnPrimary" disabled={!ui.canSubmit} type="submit">
+          {saving ? (mode === "create" ? "작성 중…" : "저장 중…") : mode === "create" ? "작성" : "저장"}
+        </button>
+
+        <Link
+          className={`btn btnLink ${saving ? "isDisabled" : ""}`}
+          to={cancelTo}
+          state={cancelState}
+          onClick={onCancelClick}
+        >
+          취소
+        </Link>
+
+        <div className="spacer" />
+
+        <span className="editActionHint">서버 검증 에러는 필드별로 표시됩니다.</span>
+      </div>
+    );
+  }
+
+  if (mode === "edit" && !isValidId) {
+    return <div className="error">잘못된 접근입니다.</div>;
+  }
+
   return (
     <div>
-      <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-        <h2 className="pageTitle">{mode === "create" ? "새 글" : "글 수정"}</h2>
+      <div className="editHeaderBar">
+        <Link to={cancelTo} state={cancelState} className="btn btnLink" onClick={onCancelClick}>
+          ← {mode === "create" ? "목록으로" : "상세로"}
+        </Link>
         {dirty && <span className="pill">미저장</span>}
+      </div>
+
+      <div className="editTitleRow">
+        <div>
+          <div className="editEyebrow">{mode === "create" ? "Create Post" : "Edit Post"}</div>
+          <h2 className="pageTitle editPageTitle">{mode === "create" ? "새 글 작성" : "게시글 수정"}</h2>
+        </div>
       </div>
 
       {err && (
@@ -192,73 +233,102 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
       )}
 
       {loading && mode === "edit" ? (
-        <div className="card cardPad emptyState" style={{ maxWidth: 680 }}>
+        <div className="card cardPad emptyState editShell">
           <div className="emptyTitle">불러오는 중…</div>
           <div className="muted">게시글 내용을 가져오고 있습니다.</div>
           <div className="row" style={{ justifyContent: "center", marginTop: 12 }}>
-            <Link className="btn btnLink" to={cancelTo} state={{ from: listBack }}>
+            <Link className="btn btnLink" to={cancelTo} state={cancelState}>
               돌아가기
             </Link>
           </div>
         </div>
       ) : (
-        <div className="card cardPad" style={{ maxWidth: 680 }} aria-busy={saving}>
-          <div className="stack">
-            <input
-              className="input"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="제목"
-              maxLength={TITLE_MAX + 200}
-              disabled={saving}
-            />
+        <form className="editShell" onSubmit={onSubmit} aria-busy={saving}>
+          {saving && (
+            <div className="card cardPad editSavingBanner">
+              <div className="editSavingTitle">{mode === "create" ? "작성 중…" : "저장 중…"}</div>
+              <div className="muted">잠시만 기다려주세요. 처리 중에는 다른 동작이 잠깁니다.</div>
+            </div>
+          )}
 
-            <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}>
-              <span style={{ color: ui.titleMsg ? "var(--danger)" : "var(--muted)" }}>{ui.titleMsg}</span>
-              <span style={{ color: ui.titleTooLong ? "var(--danger)" : "var(--muted)" }}>
-                {title.length}/{TITLE_MAX}
-              </span>
+          <section className="card cardPad editCard">
+            <div className="editSectionTop">
+              <div className="editSectionTitle">기본 정보</div>
+              <div className="editSectionDesc">제목은 목록과 상세 페이지에서 가장 먼저 보이는 정보입니다.</div>
             </div>
 
-            <textarea
-              className="textarea"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="내용"
-              rows={12}
-              maxLength={CONTENT_MAX + 1000}
-              disabled={saving}
-            />
+            <label className="editField">
+              <span className="editLabel">제목</span>
+              <input
+                className={`input ${ui.titleMsg ? "inputInvalid" : ""}`}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="예) 검색 상태가 유지되는 게시글 목록 UX 정리"
+                maxLength={TITLE_MAX + 200}
+                disabled={saving}
+              />
+              <div className="editFieldMeta">
+                <span className={ui.titleMsg ? "fieldErrorText" : "muted"}>{ui.titleMsg || "한눈에 내용을 알 수 있게 작성하세요."}</span>
+                <span className={ui.titleTooLong ? "fieldErrorText" : "muted"}>
+                  {title.length}/{TITLE_MAX}
+                </span>
+              </div>
+            </label>
+          </section>
 
-            <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}>
-              <span style={{ color: ui.contentMsg ? "var(--danger)" : "var(--muted)" }}>{ui.contentMsg}</span>
-              <span style={{ color: ui.contentTooLong ? "var(--danger)" : "var(--muted)" }}>
-                {content.length}/{CONTENT_MAX}
-              </span>
+          <section className="card cardPad editCard">
+            <div className="editSectionTop">
+              <div className="editSectionTitle">본문</div>
+              <div className="editSectionDesc">줄바꿈은 그대로 저장되며, 상세 페이지에서 읽기 편하게 표시됩니다.</div>
             </div>
 
-            <div className="row" style={{ gap: 10 }}>
-              <button className="btn btnPrimary" disabled={!ui.canSubmit} onClick={onSubmit}>
-                {saving ? (mode === "create" ? "작성 중…" : "저장 중…") : mode === "create" ? "작성" : "저장"}
-              </button>
+            <label className="editField">
+              <span className="editLabel">내용</span>
+              <textarea
+                className={`textarea editTextarea ${ui.contentMsg ? "inputInvalid" : ""}`}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="내용을 입력하세요."
+                rows={14}
+                maxLength={CONTENT_MAX + 1000}
+                disabled={saving}
+              />
+              <div className="editFieldMeta">
+                <span className={ui.contentMsg ? "fieldErrorText" : "muted"}>
+                  {ui.contentMsg || "너무 짧은 내용보다는 핵심이 드러나게 작성하는 편이 좋습니다."}
+                </span>
+                <span className={ui.contentTooLong ? "fieldErrorText" : "muted"}>
+                  {content.length}/{CONTENT_MAX}
+                </span>
+              </div>
+            </label>
+          </section>
 
-              <Link
-                className={`btn btnLink ${saving ? "isDisabled" : ""}`}
-                to={cancelTo}
-                state={{ from: listBack }}
-                onClick={onCancelClick}
-              >
-                취소
-              </Link>
-
-              <div className="spacer" />
-
-              <span className="muted" style={{ fontSize: 12 }}>
-                서버 검증 에러는 필드별로 표시됩니다.
-              </span>
+          <section className="card cardPad editSummaryCard">
+            <div className="editSummaryTitle">작성 상태</div>
+            <div className="editSummaryGrid">
+              <div className="editSummaryItem">
+                <div className="editSummaryLabel">제목</div>
+                <div className="editSummaryValue">
+                  {ui.titleBlank ? "입력 필요" : ui.titleTooLong ? "길이 초과" : "정상"}
+                </div>
+              </div>
+              <div className="editSummaryItem">
+                <div className="editSummaryLabel">내용</div>
+                <div className="editSummaryValue">
+                  {ui.contentBlank ? "입력 필요" : ui.contentTooLong ? "길이 초과" : "정상"}
+                </div>
+              </div>
+              <div className="editSummaryItem">
+                <div className="editSummaryLabel">저장 가능</div>
+                <div className="editSummaryValue">{ui.canSubmit ? "가능" : "불가"}</div>
+              </div>
             </div>
-          </div>
-        </div>
+          </section>
+
+          {renderActions()}
+          <div className="editFooterActions">{renderActions()}</div>
+        </form>
       )}
     </div>
   );
