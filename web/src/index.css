@@ -1002,3 +1002,7 @@ button {
     padding: 0 12px;
   }
 }
+
+.detailActionsOutside {
+  margin-top: 8px;
+}

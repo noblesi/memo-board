@@ -121,7 +121,14 @@ export default function PostDetailPage() {
       <section className="detailHero card cardPad">
         <div className="detailEyebrow">게시글 상세</div>
         <h2 className="pageTitle detailTitle">{post.title}</h2>
+      </section>
 
+      <section className="card cardPad detailBodyCard">
+        <div className="detailSectionTitle">내용</div>
+        <div className="detailContent">{post.content}</div>
+      </section>
+
+      <div className="detailActionsOutside">
         <div className="detailActions">
           <Link
             to={`/posts/${postId}/edit`}
@@ -145,12 +152,7 @@ export default function PostDetailPage() {
             목록으로
           </Link>
         </div>
-      </section>
-
-      <section className="card cardPad detailBodyCard">
-        <div className="detailSectionTitle">내용</div>
-        <div className="detailContent">{post.content}</div>
-      </section>
+      </div>
     </div>
   );
 }
