@@ -78,69 +78,11 @@ export default function PostDetailPage() {
     }
   }
 
-  if (err) {
+  function renderActionButtons() {
     return (
-      <div>
-        <h2 className="pageTitle">게시글</h2>
-        <div className="error" style={{ marginBottom: 12 }}>
-          {err}
-        </div>
-        <Link to={backTo} className="btn btnLink">
-          목록으로
-        </Link>
-      </div>
-    );
-  }
-
-  if (loading && !post) {
-    return (
-      <div>
-        <h2 className="pageTitle">게시글</h2>
-        <div className="card cardPad emptyState" style={{ marginBottom: 12 }}>
-          <div className="emptyTitle">불러오는 중…</div>
-          <div className="muted">게시글 내용을 가져오고 있습니다.</div>
-        </div>
-        <Link to={backTo} className="btn btnLink">
-          목록으로
-        </Link>
-      </div>
-    );
-  }
-
-  if (!post) {
-    return (
-      <div>
-        <h2 className="pageTitle">게시글</h2>
-        <div className="muted">데이터가 없습니다.</div>
-        <div style={{ marginTop: 12 }}>
-          <Link to={backTo} className="btn btnLink">
-            목록으로
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div aria-busy={deleting}>
-      <h2 className="pageTitle">{post.title}</h2>
-
-      <div className="row" style={{ justifyContent: "space-between", marginBottom: 10 }}>
-        <div className="muted" style={{ fontSize: 12 }}>
-          생성: {formatDate(post.createdAt)} · 수정: {formatDate(post.updatedAt)}
-        </div>
-        <span className="pill mono">임시ID #{post.id}</span>
-      </div>
-
-      <div className="card cardPad">
-        <pre className="mono" style={{ margin: 0, whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
-          {post.content}
-        </pre>
-      </div>
-
-      <div className="row" style={{ gap: 10, marginTop: 14 }}>
+      <div className="detailActions">
         <Link
-          to={`/posts/${post.id}/edit`}
+          to={`/posts/${postId}/edit`}
           state={{ from: backTo }}
           className={`btn btnPrimary ${deleting ? "isDisabled" : ""}`}
           aria-disabled={deleting}
@@ -158,9 +100,110 @@ export default function PostDetailPage() {
         <div className="spacer" />
 
         <Link to={backTo} className="btn btnLink">
-          목록
+          목록으로
         </Link>
       </div>
+    );
+  }
+
+  if (err) {
+    return (
+      <div>
+        <div className="detailHeaderBar">
+          <Link to={backTo} className="btn btnLink">
+            ← 목록으로
+          </Link>
+        </div>
+
+        <h2 className="pageTitle">게시글</h2>
+        <div className="error" style={{ marginBottom: 12 }}>
+          {err}
+        </div>
+        <Link to={backTo} className="btn btnLink">
+          목록으로
+        </Link>
+      </div>
+    );
+  }
+
+  if (loading && !post) {
+    return (
+      <div>
+        <div className="detailHeaderBar">
+          <Link to={backTo} className="btn btnLink">
+            ← 목록으로
+          </Link>
+        </div>
+
+        <h2 className="pageTitle">게시글</h2>
+        <div className="card cardPad emptyState" style={{ marginBottom: 12 }}>
+          <div className="emptyTitle">불러오는 중…</div>
+          <div className="muted">게시글 내용을 가져오고 있습니다.</div>
+        </div>
+        <Link to={backTo} className="btn btnLink">
+          목록으로
+        </Link>
+      </div>
+    );
+  }
+
+  if (!post) {
+    return (
+      <div>
+        <div className="detailHeaderBar">
+          <Link to={backTo} className="btn btnLink">
+            ← 목록으로
+          </Link>
+        </div>
+
+        <h2 className="pageTitle">게시글</h2>
+        <div className="muted">데이터가 없습니다.</div>
+        <div style={{ marginTop: 12 }}>
+          <Link to={backTo} className="btn btnLink">
+            목록으로
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div aria-busy={deleting}>
+      <div className="detailHeaderBar">
+        <Link to={backTo} className="btn btnLink">
+          ← 목록으로
+        </Link>
+        <span className="pill mono">임시ID #{post.id}</span>
+      </div>
+
+      <section className="detailHero card cardPad">
+        <div className="detailHeroTop">
+          <div>
+            <div className="detailEyebrow">게시글 상세</div>
+            <h2 className="pageTitle detailTitle">{post.title}</h2>
+          </div>
+        </div>
+
+        <div className="detailMetaGrid">
+          <div className="detailMetaItem">
+            <div className="detailMetaLabel">생성일</div>
+            <div className="detailMetaValue">{formatDate(post.createdAt)}</div>
+          </div>
+          <div className="detailMetaItem">
+            <div className="detailMetaLabel">수정일</div>
+            <div className="detailMetaValue">{formatDate(post.updatedAt)}</div>
+          </div>
+        </div>
+
+        {renderActionButtons()}
+      </section>
+
+      <section className="card cardPad detailBodyCard">
+        <div className="detailSectionTitle">내용</div>
+        <div className="detailContent">{post.content}</div>
+      </section>
+
+      <div className="detailFooterActions">{renderActionButtons()}</div>
     </div>
   );
 }
