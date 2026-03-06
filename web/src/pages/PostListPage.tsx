@@ -187,16 +187,10 @@ export default function PostListPage() {
 
   return (
     <div>
-      <div
-        className="row"
-        style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}
-      >
+      <div style={{ marginBottom: 12 }}>
         <h2 className="pageTitle" style={{ margin: 0 }}>
           게시글
         </h2>
-        <Link to="/new" state={{ from }} className="btn btnPrimary">
-          새 글
-        </Link>
       </div>
 
       <div className="listContentPad">
@@ -300,45 +294,40 @@ export default function PostListPage() {
 
       <div className="bottomDock">
         <div className="card cardPad bottomDockInner">
-          <div
-            className="row"
-            style={{ justifyContent: "space-between", alignItems: "center", gap: 10 }}
-          >
-            <div className="rowControls" style={{ flex: 1 }}>
-              <input
-                ref={inputRef}
-                className="input"
-                value={draftQ}
-                onChange={(e) => setDraftQ(e.target.value)}
-                placeholder="검색(제목/내용)"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") setListParams({ q: draftQ, page: 0 });
-                  if (e.key === "Escape") clearSearch(true);
-                }}
-              />
+          <div className="rowControls">
+            <input
+              ref={inputRef}
+              className="input"
+              value={draftQ}
+              onChange={(e) => setDraftQ(e.target.value)}
+              placeholder="검색(제목/내용)"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") setListParams({ q: draftQ, page: 0 });
+                if (e.key === "Escape") clearSearch(true);
+              }}
+            />
 
-              {draftQ.trim().length > 0 && (
-                <button
-                  type="button"
-                  className="btn btnIcon"
-                  title="검색어 지우기 (Esc)"
-                  aria-label="검색어 지우기"
-                  onClick={() => clearSearch(true)}
-                  disabled={loading}
-                >
-                  ✕
-                </button>
-              )}
-
+            {draftQ.trim().length > 0 && (
               <button
                 type="button"
-                className="btn btnPrimary"
-                onClick={() => setListParams({ q: draftQ, page: 0 })}
+                className="btn btnIcon"
+                title="검색어 지우기 (Esc)"
+                aria-label="검색어 지우기"
+                onClick={() => clearSearch(true)}
                 disabled={loading}
               >
-                검색
+                ✕
               </button>
-            </div>
+            )}
+
+            <button
+              type="button"
+              className="btn btnPrimary"
+              onClick={() => setListParams({ q: draftQ, page: 0 })}
+              disabled={loading}
+            >
+              검색
+            </button>
           </div>
 
           <div className="dockSummaryRow">
@@ -346,9 +335,6 @@ export default function PostListPage() {
               <span className="pill">총 {totalCountText}개</span>
               {hasQuery && <span className="pill">검색: {qParam.trim()}</span>}
             </div>
-            <span className="muted dockHint">
-              검색/정렬/표시개수/페이지가 URL에 반영됩니다.
-            </span>
           </div>
 
           <div className="dockControlRow">

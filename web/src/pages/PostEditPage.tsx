@@ -115,8 +115,6 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
       contentMsg,
       titleTooLong,
       contentTooLong,
-      titleBlank,
-      contentBlank,
     };
   }, [title, content, fieldErrs, saving, loading]);
 
@@ -302,28 +300,6 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
                 </span>
               </div>
             </label>
-          </section>
-
-          <section className="card cardPad editSummaryCard">
-            <div className="editSummaryTitle">작성 상태</div>
-            <div className="editSummaryGrid">
-              <div className="editSummaryItem">
-                <div className="editSummaryLabel">제목</div>
-                <div className="editSummaryValue">
-                  {ui.titleBlank ? "입력 필요" : ui.titleTooLong ? "길이 초과" : "정상"}
-                </div>
-              </div>
-              <div className="editSummaryItem">
-                <div className="editSummaryLabel">내용</div>
-                <div className="editSummaryValue">
-                  {ui.contentBlank ? "입력 필요" : ui.contentTooLong ? "길이 초과" : "정상"}
-                </div>
-              </div>
-              <div className="editSummaryItem">
-                <div className="editSummaryLabel">저장 가능</div>
-                <div className="editSummaryValue">{ui.canSubmit ? "가능" : "불가"}</div>
-              </div>
-            </div>
           </section>
 
           <div className="editActions">
