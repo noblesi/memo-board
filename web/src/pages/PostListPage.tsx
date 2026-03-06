@@ -253,8 +253,6 @@ export default function PostListPage() {
         {!showLoadingFirst && !showEmpty && (
           <div className="postList">
             {(data?.items ?? []).map((p) => {
-              const author = (p as any).author ?? (p as any).authorName ?? "";
-
               return (
                 <article
                   key={p.id}
@@ -282,7 +280,6 @@ export default function PostListPage() {
                   </div>
 
                   <div className="postCardSide">
-                    {author ? <div className="postSideAuthor">{author}</div> : null}
                     <div className="postSideTime">{formatUpdatedAt(p.updatedAt)}</div>
                   </div>
                 </article>

@@ -549,12 +549,6 @@ button {
   text-align: right;
 }
 
-.postSideAuthor {
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.25;
-}
-
 .postSideTime {
   font-size: 13px;
   font-weight: 700;
