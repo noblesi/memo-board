@@ -919,3 +919,68 @@ a:hover {
     display: none;
   }
 }
+
+.listContentPad {
+  padding-bottom: 220px;
+}
+
+.dockSummaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.dockControlRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.dockControlGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dockLabel {
+  font-size: 12px;
+}
+
+.dockHint {
+  font-size: 12px;
+}
+
+.dockPager {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dockPageLabel {
+  min-width: 72px;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .listContentPad {
+    padding-bottom: 300px;
+  }
+
+  .dockSummaryRow,
+  .dockControlRow {
+    align-items: stretch;
+  }
+
+  .dockPager {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

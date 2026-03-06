@@ -13,7 +13,6 @@ function parseNonNegInt(v: string | null, fallback: number) {
 }
 
 function escapeRegExp(s: string) {
-  // eslint-disable-next-line no-useless-escape
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
@@ -75,7 +74,6 @@ export default function PostListPage() {
   const location = useLocation();
 
   const from = location.pathname + location.search;
-
   const mountFromRef = useRef(from);
   const restoredRef = useRef(false);
 
@@ -87,9 +85,13 @@ export default function PostListPage() {
   const sortParam = useMemo(() => normalizeSort(sp.get("sort") ?? DEFAULT_SORT), [sp]);
 
   const [draftQ, setDraftQ] = useState(qParam);
-  useEffect(() => setDraftQ(qParam), [qParam]);
+  const [data, setData] = useState<ListState | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => setDraftQ(qParam), [qParam]);
 
   useEffect(() => {
     rememberLastList(from);
@@ -100,10 +102,6 @@ export default function PostListPage() {
       saveScroll(from);
     };
   }, [from]);
-
-  const [data, setData] = useState<ListState | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
 
   const dtf = useMemo(
     () =>
@@ -127,6 +125,7 @@ export default function PostListPage() {
   async function load(p: number, query: string, size: number, sort: string) {
     setLoading(true);
     setErr(null);
+
     try {
       const trimmed = query.trim();
       const res = await listPosts({
@@ -159,8 +158,8 @@ export default function PostListPage() {
       size: String(size),
       sort,
     };
-    if (q) params.q = q;
 
+    if (q) params.q = q;
     setSp(params);
   }
 
@@ -183,11 +182,21 @@ export default function PostListPage() {
     }
   }, [data, err]);
 
+  useEffect(() => {
+    if (!data) return;
+    if (loading) return;
+    if (data.totalPages <= 0) return;
+    if (pageParam < data.totalPages) return;
+
+    setListParams({ page: Math.max(0, data.totalPages - 1) });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, loading, pageParam]);
+
   const totalPages = Math.max(1, data?.totalPages ?? 1);
   const totalCountText = loading && !data ? "…" : String(data?.totalElements ?? 0);
-
   const showLoadingFirst = loading && !data;
   const showEmpty = !loading && !!data && data.items.length === 0;
+  const hasQuery = qParam.trim().length > 0;
 
   const sizeOptions: readonly DropdownOption<number>[] = useMemo(
     () => SIZE_OPTIONS.map((n) => ({ value: n, label: `${n}개` })),
@@ -200,7 +209,6 @@ export default function PostListPage() {
 
   return (
     <div>
-      {/* 상단: 최소 헤더 */}
       <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
         <h2 className="pageTitle" style={{ margin: 0 }}>
           게시글
@@ -210,11 +218,16 @@ export default function PostListPage() {
         </Link>
       </div>
 
-      {/* 본문이 하단 고정 바에 가리지 않도록 패딩 확보 */}
-      <div style={{ paddingBottom: 190 }}>
+      <div className="listContentPad">
         {err && (
-          <div className="error" style={{ marginBottom: 12 }}>
-            {err}
+          <div className="card cardPad emptyState" style={{ marginBottom: 12 }}>
+            <div className="emptyTitle">목록을 불러오지 못했습니다</div>
+            <div className="muted">{err}</div>
+            <div className="row" style={{ justifyContent: "center", marginTop: 12 }}>
+              <button className="btn btnPrimary" onClick={() => load(pageParam, qParam, sizeParam, sortParam)} disabled={loading}>
+                다시 시도
+              </button>
+            </div>
           </div>
         )}
 
@@ -227,12 +240,26 @@ export default function PostListPage() {
 
         {showEmpty && (
           <div className="card cardPad emptyState" style={{ marginBottom: 12 }}>
-            <div className="emptyTitle">게시글이 없습니다</div>
-            <div className="muted">첫 글을 작성해보세요.</div>
-            <div className="row" style={{ justifyContent: "center", marginTop: 12 }}>
-              <Link to="/new" state={{ from }} className="btn btnPrimary">
-                새 글 작성
-              </Link>
+            <div className="emptyTitle">{hasQuery ? "검색 결과가 없습니다" : "게시글이 없습니다"}</div>
+            <div className="muted">
+              {hasQuery ? `“${qParam.trim()}”에 대한 결과를 찾지 못했습니다.` : "첫 글을 작성해보세요."}
+            </div>
+
+            <div className="row" style={{ justifyContent: "center", marginTop: 12, flexWrap: "wrap" }}>
+              {hasQuery ? (
+                <>
+                  <button className="btn" onClick={() => clearSearch(true)}>
+                    검색 초기화
+                  </button>
+                  <Link to="/new" state={{ from }} className="btn btnPrimary">
+                    새 글 작성
+                  </Link>
+                </>
+              ) : (
+                <Link to="/new" state={{ from }} className="btn btnPrimary">
+                  새 글 작성
+                </Link>
+              )}
             </div>
           </div>
         )}
@@ -251,7 +278,10 @@ export default function PostListPage() {
                   aria-label={`게시글 ${p.id} 열기`}
                   onClick={() => navigate(`/posts/${p.id}`, { state: { from } })}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") navigate(`/posts/${p.id}`, { state: { from } });
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      navigate(`/posts/${p.id}`, { state: { from } });
+                    }
                   }}
                 >
                   <div className="postTop">
@@ -282,10 +312,8 @@ export default function PostListPage() {
         )}
       </div>
 
-      {/* ✅ 하단 고정 바 (검색/옵션/페이지네이션) */}
       <div className="bottomDock">
         <div className="card cardPad bottomDockInner">
-          {/* 검색 */}
           <div className="row" style={{ justifyContent: "space-between", alignItems: "center", gap: 10 }}>
             <div className="rowControls" style={{ flex: 1 }}>
               <input
@@ -313,34 +341,23 @@ export default function PostListPage() {
                 </button>
               )}
 
-              <button className="btn btnPrimary" onClick={() => setListParams({ q: draftQ, page: 0 })} disabled={loading}>
+              <button type="button" className="btn btnPrimary" onClick={() => setListParams({ q: draftQ, page: 0 })} disabled={loading}>
                 검색
               </button>
             </div>
           </div>
 
-          {/* 옵션 + 페이지네이션 */}
-          <div
-            className="row"
-            style={{
-              marginTop: 10,
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 10,
-              flexWrap: "wrap",
-            }}
-          >
-            {/* 왼쪽: 총 개수/검색 태그 */}
+          <div className="dockSummaryRow">
             <div className="row" style={{ gap: 8, flexWrap: "wrap", alignItems: "center" }}>
               <span className="pill">총 {totalCountText}개</span>
-              {qParam.trim() && <span className="pill">검색: {qParam.trim()}</span>}
+              {hasQuery && <span className="pill">검색: {qParam.trim()}</span>}
             </div>
+            <span className="muted dockHint">검색/정렬/표시개수/페이지가 URL에 반영됩니다.</span>
+          </div>
 
-            {/* 오른쪽: 정렬/표시개수/페이지네이션 */}
-            <div className="row" style={{ gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-              <span className="muted" style={{ fontSize: 12 }}>
-                정렬
-              </span>
+          <div className="dockControlRow">
+            <div className="dockControlGroup">
+              <span className="muted dockLabel">정렬</span>
               <Dropdown
                 value={sortParam}
                 options={SORT_OPTIONS}
@@ -351,10 +368,10 @@ export default function PostListPage() {
                 direction="up"
                 align="right"
               />
+            </div>
 
-              <span className="muted" style={{ fontSize: 12 }}>
-                표시
-              </span>
+            <div className="dockControlGroup">
+              <span className="muted dockLabel">표시</span>
               <Dropdown
                 value={sizeParam}
                 options={sizeOptions}
@@ -365,40 +382,55 @@ export default function PostListPage() {
                 direction="up"
                 align="right"
               />
-
-              {/* ✅ 페이지 이동 (하단 고정 카드로 이동) */}
-              <div className="row" style={{ gap: 8, alignItems: "center" }}>
-                <button
-                  className="btn"
-                  onClick={() => setListParams({ page: pageParam - 1 })}
-                  disabled={!canPrev}
-                  aria-label="이전 페이지"
-                  title="이전"
-                >
-                  이전
-                </button>
-
-                <span className="muted" style={{ minWidth: 70, textAlign: "center" }}>
-                  {pageLabel}
-                </span>
-
-                <button
-                  className="btn"
-                  onClick={() => setListParams({ page: pageParam + 1 })}
-                  disabled={!canNext}
-                  aria-label="다음 페이지"
-                  title="다음"
-                >
-                  다음
-                </button>
-              </div>
             </div>
-          </div>
 
-          <div className="row" style={{ marginTop: 8, justifyContent: "flex-end" }}>
-            <span className="muted" style={{ fontSize: 12 }}>
-              검색/정렬/표시개수/페이지가 URL에 반영됩니다.
-            </span>
+            <div className="dockPager">
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setListParams({ page: 0 })}
+                disabled={!canPrev}
+                aria-label="첫 페이지"
+                title="첫 페이지"
+              >
+                처음
+              </button>
+
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setListParams({ page: pageParam - 1 })}
+                disabled={!canPrev}
+                aria-label="이전 페이지"
+                title="이전"
+              >
+                이전
+              </button>
+
+              <span className="muted dockPageLabel">{pageLabel}</span>
+
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setListParams({ page: pageParam + 1 })}
+                disabled={!canNext}
+                aria-label="다음 페이지"
+                title="다음"
+              >
+                다음
+              </button>
+
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setListParams({ page: totalPages - 1 })}
+                disabled={!canNext}
+                aria-label="마지막 페이지"
+                title="마지막 페이지"
+              >
+                마지막
+              </button>
+            </div>
           </div>
         </div>
       </div>
