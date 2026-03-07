@@ -1,6 +1,8 @@
 package com.mskim.memo_api;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +19,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -51,8 +52,7 @@ public class SecurityConfig {
         UserDetailsService userDetailsService,
         PasswordEncoder passwordEncoder
     ) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
         return provider;
     }
@@ -75,12 +75,24 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
             )
             .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((request, response, authException) ->
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
-                )
-                .accessDeniedHandler((request, response, accessDeniedException) ->
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN)
-                )
+                .authenticationEntryPoint((request, response, authException) -> {
+                    writeJsonError(
+                        response,
+                        HttpServletResponse.SC_UNAUTHORIZED,
+                        "Unauthorized",
+                        "unauthorized",
+                        request.getRequestURI()
+                    );
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    writeJsonError(
+                        response,
+                        HttpServletResponse.SC_FORBIDDEN,
+                        "Forbidden",
+                        "forbidden",
+                        request.getRequestURI()
+                    );
+                })
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET, "/posts", "/posts/**").permitAll()
@@ -105,5 +117,43 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    private void writeJsonError(
+        HttpServletResponse response,
+        int status,
+        String error,
+        String message,
+        String path
+    ) throws IOException {
+        response.setStatus(status);
+        response.setContentType("application/json;charset=UTF-8");
+
+        String body = """
+            {
+              "timestamp":"%s",
+              "status":%d,
+              "error":"%s",
+              "message":"%s",
+              "path":"%s"
+            }
+            """.formatted(
+                Instant.now(),
+                status,
+                escapeJson(error),
+                escapeJson(message),
+                escapeJson(path)
+            );
+
+        response.getWriter().write(body);
+    }
+
+    private String escapeJson(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"");
     }
 }

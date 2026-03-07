@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -60,7 +61,8 @@ public class AuthController {
     ) {}
 
     @PostMapping("/signup")
-    public ResponseEntity<SignupRes> signup(@Valid @RequestBody SignupReq req) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public SignupRes signup(@Valid @RequestBody SignupReq req) {
         if (userRepository.existsByLoginId(req.loginId())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "loginId already exists");
         }
@@ -73,12 +75,10 @@ public class AuthController {
 
         User saved = userRepository.save(user);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-            new SignupRes(
-                saved.getId(),
-                saved.getLoginId(),
-                saved.getRole().name()
-            )
+        return new SignupRes(
+            saved.getId(),
+            saved.getLoginId(),
+            saved.getRole().name()
         );
     }
 
