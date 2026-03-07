@@ -17,6 +17,10 @@ public class Post {
     @Column(nullable = false, length = 5000)
     private String content;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private User author;
+
     @Column(nullable = false)
     private Instant createdAt;
 
@@ -28,6 +32,12 @@ public class Post {
     public Post(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    public Post(String title, String content, User author) {
+        this.title = title;
+        this.content = content;
+        this.author = author;
     }
 
     @PrePersist
@@ -43,13 +53,23 @@ public class Post {
     }
 
     public Long getId() { return id; }
+
     public String getTitle() { return title; }
+
     public String getContent() { return content; }
+
+    public User getAuthor() { return author; }
+
     public Instant getCreatedAt() { return createdAt; }
+
     public Instant getUpdatedAt() { return updatedAt; }
 
     public void update(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    public void assignAuthor(User author) {
+        this.author = author;
     }
 }

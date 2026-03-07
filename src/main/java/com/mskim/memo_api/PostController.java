@@ -1,22 +1,20 @@
 package com.mskim.memo_api;
 
+import com.mskim.memo_api.common.PageRes;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.net.URI;
+import java.time.Instant;
+import java.util.Objects;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
-import com.mskim.memo_api.common.PageRes;
-
-import java.net.URI;
-import java.time.Instant;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/posts")
@@ -30,53 +28,61 @@ public class PostController {
     }
 
     public record CreateReq(
-            @NotBlank @Size(max = 100) String title,
-            @NotBlank @Size(max = 5000) String content
+        @NotBlank @Size(max = 100) String title,
+        @NotBlank @Size(max = 5000) String content
     ) {}
 
     public record UpdateReq(
-            @NotBlank @Size(max = 100) String title,
-            @NotBlank @Size(max = 5000) String content
+        @NotBlank @Size(max = 100) String title,
+        @NotBlank @Size(max = 5000) String content
     ) {}
 
-    // 상세/생성/수정 응답 DTO
     public record PostRes(
-            Long id,
-            String title,
-            String content,
-            Instant createdAt,
-            Instant updatedAt
+        Long id,
+        String title,
+        String content,
+        String authorName,
+        Instant createdAt,
+        Instant updatedAt
     ) {
         static PostRes from(Post p) {
-            return new PostRes(p.getId(), p.getTitle(), p.getContent(), p.getCreatedAt(), p.getUpdatedAt());
+            return new PostRes(
+                p.getId(),
+                p.getTitle(),
+                p.getContent(),
+                authorNameOf(p),
+                p.getCreatedAt(),
+                p.getUpdatedAt()
+            );
         }
     }
 
-    // 목록용 요약 DTO (content 전체 대신 summary 제공)
-        public record PostSummaryRes(
-                Long id,
-                String title,
-                String summary,
-                Instant createdAt,
-                Instant updatedAt
-        ) {
+    public record PostSummaryRes(
+        Long id,
+        String title,
+        String summary,
+        String authorName,
+        Instant createdAt,
+        Instant updatedAt
+    ) {
         static PostSummaryRes from(Post p) {
             return new PostSummaryRes(
-                    p.getId(),
-                    p.getTitle(),
-                    summarize(p.getContent()),
-                    p.getCreatedAt(),
-                    p.getUpdatedAt()
+                p.getId(),
+                p.getTitle(),
+                summarize(p.getContent()),
+                authorNameOf(p),
+                p.getCreatedAt(),
+                p.getUpdatedAt()
             );
         }
 
         static String summarize(String content) {
             if (content == null) return "";
             String s = content
-                    .replace("\r\n", "\n")
-                    .replace('\r', '\n')
-                    .replaceAll("\\s+", " ")
-                    .trim();
+                .replace("\r\n", "\n")
+                .replace('\r', '\n')
+                .replaceAll("\\s+", " ")
+                .trim();
 
             int limit = 120;
             if (s.length() <= limit) return s;
@@ -87,23 +93,20 @@ public class PostController {
     @PostMapping
     public ResponseEntity<PostRes> create(@Valid @RequestBody CreateReq req) {
         Post saved = repo.save(new Post(req.title(), req.content()));
-
         Long id = Objects.requireNonNull(saved.getId(), "saved.id must not be null after save");
-        URI location = Objects.requireNonNull(URI.create("/posts/" + id));
-
+        URI location = URI.create("/posts/" + id);
         return ResponseEntity.created(location).body(PostRes.from(saved));
     }
 
     @GetMapping
     public PageRes<PostSummaryRes> list(
-            @RequestParam(defaultValue = "") String q,
-            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+        @RequestParam(defaultValue = "") String q,
+        @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Pageable p = Objects.requireNonNull(pageable, "pageable must not be null");
-
         Page<Post> page = q.isBlank()
-                ? repo.findAll(p)
-                : repo.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(q, q, p);
+            ? repo.findAll(p)
+            : repo.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(q, q, p);
 
         return PageRes.from(page.map(PostSummaryRes::from));
     }
@@ -111,17 +114,17 @@ public class PostController {
     @GetMapping("/{id}")
     public PostRes get(@PathVariable long id) {
         Post post = repo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found"));
         return PostRes.from(post);
     }
 
     @PutMapping("/{id}")
     public PostRes update(@PathVariable long id, @Valid @RequestBody UpdateReq req) {
         Post post = repo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found"));
 
         post.update(req.title(), req.content());
-        Post saved = repo.save(Objects.requireNonNull(post, "post must not be null"));
+        Post saved = repo.save(post);
         return PostRes.from(saved);
     }
 
@@ -130,7 +133,13 @@ public class PostController {
         if (!repo.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found");
         }
+
         repo.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private static String authorNameOf(Post post) {
+        User author = post.getAuthor();
+        return author != null ? author.getLoginId() : null;
     }
 }
