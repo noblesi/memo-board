@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -22,9 +23,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class PostController {
 
     private final PostRepository repo;
+    private final UserRepository userRepository;
 
-    public PostController(PostRepository repo) {
+    public PostController(PostRepository repo, UserRepository userRepository) {
         this.repo = repo;
+        this.userRepository = userRepository;
     }
 
     public record CreateReq(
@@ -78,6 +81,7 @@ public class PostController {
 
         static String summarize(String content) {
             if (content == null) return "";
+
             String s = content
                 .replace("\r\n", "\n")
                 .replace('\r', '\n')
@@ -91,9 +95,15 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostRes> create(@Valid @RequestBody CreateReq req) {
-        Post saved = repo.save(new Post(req.title(), req.content()));
+    public ResponseEntity<PostRes> create(
+        @Valid @RequestBody CreateReq req,
+        Authentication authentication
+    ) {
+        User currentUser = getCurrentUser(authentication);
+
+        Post saved = repo.save(new Post(req.title(), req.content(), currentUser));
         Long id = Objects.requireNonNull(saved.getId(), "saved.id must not be null after save");
+
         URI location = URI.create("/posts/" + id);
         return ResponseEntity.created(location).body(PostRes.from(saved));
     }
@@ -119,9 +129,16 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public PostRes update(@PathVariable long id, @Valid @RequestBody UpdateReq req) {
+    public PostRes update(
+        @PathVariable long id,
+        @Valid @RequestBody UpdateReq req,
+        Authentication authentication
+    ) {
         Post post = repo.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found"));
+
+        User currentUser = getCurrentUser(authentication);
+        validateOwnerOrAdmin(post, currentUser);
 
         post.update(req.title(), req.content());
         Post saved = repo.save(post);
@@ -129,13 +146,38 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable long id) {
-        if (!repo.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found");
+    public ResponseEntity<Void> delete(
+        @PathVariable long id,
+        Authentication authentication
+    ) {
+        Post post = repo.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found"));
+
+        User currentUser = getCurrentUser(authentication);
+        validateOwnerOrAdmin(post, currentUser);
+
+        repo.delete(post);
+        return ResponseEntity.noContent().build();
+    }
+
+    private User getCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
         }
 
-        repo.deleteById(id);
-        return ResponseEntity.noContent().build();
+        String loginId = authentication.getName();
+        return userRepository.findByLoginId(loginId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "user not found"));
+    }
+
+    private void validateOwnerOrAdmin(Post post, User currentUser) {
+        boolean isAdmin = currentUser.getRole() == UserRole.ADMIN;
+        boolean isOwner = post.getAuthor() != null
+            && Objects.equals(post.getAuthor().getId(), currentUser.getId());
+
+        if (!isAdmin && !isOwner) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "forbidden");
+        }
     }
 
     private static String authorNameOf(Post post) {
