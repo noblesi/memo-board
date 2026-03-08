@@ -1,13 +1,23 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  Link,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import PostListPage from "./pages/PostListPage";
 import PostDetailPage from "./pages/PostDetailPage";
 import PostEditPage from "./pages/PostEditPage";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import AdminPage from "./pages/AdminPage";
+import { useAuth } from "./lib/auth";
 
 const THEME_KEY = "sb_theme";
 
 type Theme = "light" | "dark";
-
 type Flash = { type: "success" | "error"; message: string };
 type NavState = { from?: string; flash?: Flash };
 
@@ -28,20 +38,99 @@ function getSystemTheme(): Theme {
   }
 }
 
+function AuthGate({ children, guestOnly = false }: { children: ReactNode; guestOnly?: boolean }) {
+  const { loading, isAuthenticated } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return (
+      <div className="card cardPad emptyState">
+        <div className="emptyTitle">불러오는 중…</div>
+        <div className="muted">로그인 상태를 확인하고 있습니다.</div>
+      </div>
+    );
+  }
+
+  if (guestOnly && isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (!guestOnly && !isAuthenticated) {
+    const from = `${location.pathname}${location.search}`;
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{
+          from,
+          flash: { type: "error", message: "로그인이 필요합니다." },
+        } satisfies NavState}
+      />
+    );
+  }
+
+  return children;
+}
+
+function AdminGate({ children }: { children: ReactNode }) {
+  const { loading, isAuthenticated, user } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return (
+      <div className="card cardPad emptyState">
+        <div className="emptyTitle">불러오는 중…</div>
+        <div className="muted">권한을 확인하고 있습니다.</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    const from = `${location.pathname}${location.search}`;
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{
+          from,
+          flash: { type: "error", message: "로그인이 필요합니다." },
+        } satisfies NavState}
+      />
+    );
+  }
+
+  if (user?.role !== "ADMIN") {
+    return (
+      <Navigate
+        to="/"
+        replace
+        state={{
+          flash: { type: "error", message: "관리자만 접근할 수 있습니다." },
+        } satisfies NavState}
+      />
+    );
+  }
+
+  return children;
+}
+
 export default function App() {
   const location = useLocation();
   const nav = useNavigate();
+  const { user, isAuthenticated, loading, logout } = useAuth();
 
   const { pathname, search } = location;
   const from = pathname + search;
 
-  // 작성/수정 화면에서는 "새 글" 숨김
-  const hideNewLink = pathname === "/new" || pathname.endsWith("/edit");
+  const hideNewLink =
+    pathname === "/new" ||
+    pathname.endsWith("/edit") ||
+    pathname === "/login" ||
+    pathname === "/signup";
 
-  // ✅ 초기 렌더 전에 theme를 결정하고 dataset까지 즉시 세팅(깜빡임 최소화)
   const [theme, setTheme] = useState<Theme>(() => {
     const stored = getStoredTheme();
-    const initial: Theme = stored ?? getSystemTheme(); // 저장값 없으면 시스템 설정(없으면 light)
+    const initial: Theme = stored ?? getSystemTheme();
     document.documentElement.dataset.theme = initial;
     return initial;
   });
@@ -57,9 +146,9 @@ export default function App() {
 
   const nextTheme: Theme = theme === "dark" ? "light" : "dark";
 
-  // ✅ Flash Toast
   const [toast, setToast] = useState<Flash | null>(null);
   const timerRef = useRef<number | null>(null);
+  const [logoutPending, setLogoutPending] = useState(false);
 
   useEffect(() => {
     const state = (location.state as NavState | null) ?? null;
@@ -68,7 +157,6 @@ export default function App() {
 
     setToast(flash);
 
-    // flash는 1회 소비 후 history state에서 제거(뒤로가기/새로고침 반복 방지)
     const raw = (location.state ?? {}) as Record<string, unknown>;
     const { flash: _flash, ...rest } = raw;
     nav(pathname + search, { replace: true, state: rest });
@@ -87,6 +175,22 @@ export default function App() {
     if (timerRef.current) window.clearTimeout(timerRef.current);
     timerRef.current = null;
     setToast(null);
+  }
+
+  async function onLogout() {
+    if (logoutPending) return;
+    setLogoutPending(true);
+    try {
+      await logout();
+      nav("/", {
+        replace: true,
+        state: {
+          flash: { type: "success", message: "로그아웃되었습니다." },
+        } satisfies NavState,
+      });
+    } finally {
+      setLogoutPending(false);
+    }
   }
 
   return (
@@ -113,30 +217,69 @@ export default function App() {
 
           <div className="spacer" />
 
-          <button
-            type="button"
-            className="btn btnIcon"
-            title={nextTheme === "dark" ? "다크로 전환" : "라이트로 전환"}
-            aria-label="테마 전환"
-            aria-pressed={theme === "dark"}
-            onClick={() => setTheme(nextTheme)}
-          >
-            <span aria-hidden>{nextTheme === "dark" ? "🌙" : "☀️"}</span>
-            <span className="btnLabel">{nextTheme === "dark" ? "다크" : "라이트"}</span>
-          </button>
+          <div className="topbarActions">
+            {!loading && isAuthenticated && user ? (
+              <div className="authUserMeta">
+                <span className="pill">{user.loginId}</span>
+                <span className="pill authRolePill">{user.role}</span>
+              </div>
+            ) : !loading ? (
+              <div className="authGuestMeta muted">게스트</div>
+            ) : (
+              <div className="authGuestMeta muted">세션 확인 중…</div>
+            )}
 
-          {!hideNewLink && (
-            <Link to="/new" state={{ from }} className="btn btnPrimary">
-              새 글
-            </Link>
-          )}
+            <button
+              type="button"
+              className="btn btnIcon"
+              title={nextTheme === "dark" ? "다크로 전환" : "라이트로 전환"}
+              aria-label="테마 전환"
+              aria-pressed={theme === "dark"}
+              onClick={() => setTheme(nextTheme)}
+            >
+              <span aria-hidden>{nextTheme === "dark" ? "🌙" : "☀️"}</span>
+              <span className="btnLabel">{nextTheme === "dark" ? "다크" : "라이트"}</span>
+            </button>
+
+            {isAuthenticated ? (
+              <>
+                {user?.role === "ADMIN" && (
+                  <Link to="/admin" className="btn">
+                    관리자
+                  </Link>
+                )}
+
+                {!hideNewLink && (
+                  <Link to="/new" state={{ from }} className="btn btnPrimary">
+                    새 글
+                  </Link>
+                )}
+
+                <button type="button" className="btn" onClick={onLogout} disabled={logoutPending}>
+                  {logoutPending ? "로그아웃 중…" : "로그아웃"}
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" state={{ from }} className="btn btnLink">
+                  로그인
+                </Link>
+                <Link to="/signup" className="btn btnPrimary">
+                  회원가입
+                </Link>
+              </>
+            )}
+          </div>
         </header>
 
         <Routes>
           <Route path="/" element={<PostListPage />} />
+          <Route path="/login" element={<AuthGate guestOnly><LoginPage /></AuthGate>} />
+          <Route path="/signup" element={<AuthGate guestOnly><SignupPage /></AuthGate>} />
           <Route path="/posts/:id" element={<PostDetailPage />} />
-          <Route path="/new" element={<PostEditPage mode="create" />} />
-          <Route path="/posts/:id/edit" element={<PostEditPage mode="edit" />} />
+          <Route path="/new" element={<AuthGate><PostEditPage mode="create" /></AuthGate>} />
+          <Route path="/posts/:id/edit" element={<AuthGate><PostEditPage mode="edit" /></AuthGate>} />
+          <Route path="/admin" element={<AdminGate><AdminPage /></AdminGate>} />
         </Routes>
       </div>
     </div>
