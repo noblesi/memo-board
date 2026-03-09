@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { ApiError, createPost, getPost, updatePost } from "../lib/api";
+import { useAuth } from "../lib/auth";
 import { getLastList } from "../lib/navMemory";
 
 const TITLE_MAX = 100;
@@ -19,12 +20,12 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
   const from = (location.state as NavState | null)?.from;
   const listBack = from ?? getLastList("/");
 
+  const { user } = useAuth();
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-
   const [initialTitle, setInitialTitle] = useState("");
   const [initialContent, setInitialContent] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -49,6 +50,23 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
 
     getPost(postId)
       .then((p) => {
+        const canEdit =
+          !!user && (user.role === "ADMIN" || user.loginId === p.authorName);
+
+        if (!canEdit) {
+          nav(`/posts/${postId}`, {
+            replace: true,
+            state: {
+              from: listBack,
+              flash: {
+                type: "error",
+                message: "작성자 본인 또는 관리자만 수정할 수 있습니다.",
+              },
+            } satisfies NavState,
+          });
+          return;
+        }
+
         setTitle(p.title);
         setContent(p.content);
         setInitialTitle(p.title);
@@ -56,7 +74,7 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
       })
       .catch((e) => setErr(String((e as any)?.message ?? e)))
       .finally(() => setLoading(false));
-  }, [mode, postId, isValidId]);
+  }, [mode, postId, isValidId, nav, listBack, user]);
 
   const dirty = useMemo(() => {
     if (loading) return false;
@@ -190,63 +208,56 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
 
     if (!dirty) return;
 
-    const ok = confirm("저장되지 않은 변경사항이 있습니다. 정말 나갈까요?");
+    const ok = confirm("저장되지 않은 변경사항이 있습니다.\n정말 나갈까요?");
     if (!ok) e.preventDefault();
   }
 
   if (mode === "edit" && !isValidId) {
-    return <div className="error">잘못된 접근입니다.</div>;
+    return (
+      <div className="editShell">
+        <div className="error">잘못된 접근입니다.</div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <div className="editHeaderBar">
-        <Link to={cancelTo} state={cancelState} className="btn btnLink" onClick={onCancelClick}>
-          ← {mode === "create" ? "목록으로" : "상세로"}
-        </Link>
-        {dirty && <span className="pill">미저장</span>}
-      </div>
+    <div className="editShell">
+      <Link to={cancelTo} state={cancelState} className="btn btnLink" onClick={onCancelClick}>
+        ← {mode === "create" ? "목록으로" : "상세로"}
+      </Link>
 
       <div className="editTitleRow">
         <div>
-          <div className="editEyebrow">{mode === "create" ? "Create Post" : "Edit Post"}</div>
-          <h2 className="pageTitle editPageTitle">
-            {mode === "create" ? "새 글 작성" : "게시글 수정"}
-          </h2>
+          <div className="pageEyebrow">{mode === "create" ? "Create Post" : "Edit Post"}</div>
+          <h2 className="pageTitle">{mode === "create" ? "새 글 작성" : "게시글 수정"}</h2>
         </div>
+
+        {dirty && <span className="pill">미저장</span>}
       </div>
 
-      {err && (
-        <div className="error" style={{ marginBottom: 12 }}>
-          {err}
-        </div>
-      )}
+      {err && <div className="error">{err}</div>}
 
       {loading && mode === "edit" ? (
-        <div className="card cardPad emptyState editShell">
+        <div className="card cardPad emptyState">
           <div className="emptyTitle">불러오는 중…</div>
           <div className="muted">게시글 내용을 가져오고 있습니다.</div>
-          <div className="row" style={{ justifyContent: "center", marginTop: 12 }}>
-            <Link className="btn btnLink" to={cancelTo} state={cancelState}>
-              돌아가기
-            </Link>
-          </div>
+          <Link to={cancelTo} state={cancelState} className="btn btnLink">
+            돌아가기
+          </Link>
         </div>
       ) : (
-        <form className="editShell" onSubmit={onSubmit} aria-busy={saving}>
+        <form className="card cardPad editCard" onSubmit={onSubmit}>
           {saving && (
-            <div className="card cardPad editSavingBanner">
-              <div className="editSavingTitle">
-                {mode === "create" ? "작성 중…" : "저장 중…"}
-              </div>
-              <div className="muted">잠시만 기다려주세요.</div>
+            <div className="editBanner muted">
+              <div>{mode === "create" ? "작성 중…" : "저장 중…"}</div>
+              <div>잠시만 기다려주세요.</div>
             </div>
           )}
 
-          <section className="card cardPad editCard">
-            <div className="editSectionTop">
+          <section className="editSection">
+            <div className="editSectionHeader">
               <div className="editSectionTitle">기본 정보</div>
-              <div className="editSectionDesc">
+              <div className="muted">
                 제목은 목록과 상세 페이지에서 가장 먼저 보이는 정보입니다.
               </div>
             </div>
@@ -270,20 +281,14 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
                 </span>
               </div>
             </label>
-          </section>
-
-          <section className="card cardPad editCard">
-            <div className="editSectionTop">
-              <div className="editSectionTitle">본문</div>
-              <div className="editSectionDesc">
-                줄바꿈은 그대로 저장되며, 상세 페이지에서 읽기 편하게 표시됩니다.
-              </div>
-            </div>
 
             <label className="editField">
-              <span className="editLabel">내용</span>
+              <span className="editLabel">본문</span>
+              <div className="muted">
+                줄바꿈은 그대로 저장되며, 상세 페이지에서 읽기 편하게 표시됩니다.
+              </div>
               <textarea
-                className={`textarea editTextarea ${ui.contentMsg ? "inputInvalid" : ""}`}
+                className={`input textarea ${ui.contentMsg ? "inputInvalid" : ""}`}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="내용을 입력하세요."

@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { deletePost, getPost } from "../lib/api";
-import { getLastList } from "../lib/navMemory";
+import { deletePost, getPost, type Post } from "../lib/api";
 import { useAuth } from "../lib/auth";
-import type { Post } from "../lib/api";
+import { getLastList } from "../lib/navMemory";
 
 type Flash = { type: "success" | "error"; message: string };
 type NavState = { from?: string; flash?: Flash };
@@ -16,6 +15,7 @@ export default function PostDetailPage() {
   const nav = useNavigate();
   const location = useLocation();
   const backTo = (location.state as NavState | null)?.from ?? getLastList("/");
+
   const { user, isAuthenticated } = useAuth();
 
   const [post, setPost] = useState<Post | null>(null);
@@ -39,10 +39,9 @@ export default function PostDetailPage() {
   }, [postId, isValidId]);
 
   const canManage = useMemo(() => {
-    if (!user || !post) return false;
-    if (user.role === "ADMIN") return true;
-    return !!post.authorName && user.loginId === post.authorName;
-  }, [user, post]);
+    if (!isAuthenticated || !user || !post) return false;
+    return user.role === "ADMIN" || user.loginId === post.authorName;
+  }, [isAuthenticated, user, post]);
 
   async function onDelete() {
     if (!post || deleting || !canManage) return;
@@ -68,32 +67,30 @@ export default function PostDetailPage() {
 
   if (err) {
     return (
-      <div>
-        <div className="detailHeaderBar">
-          <Link to={backTo} className="btn btnLink">
-            ← 목록으로
-          </Link>
+      <div className="detailShell">
+        <Link to={backTo} className="btn btnLink">
+          ← 목록으로
+        </Link>
+
+        <div className="detailTitleRow">
+          <h2 className="pageTitle">게시글</h2>
         </div>
 
-        <h2 className="pageTitle">게시글</h2>
-
-        <div className="error" style={{ marginBottom: 12 }}>
-          {err}
-        </div>
+        <div className="error">{err}</div>
       </div>
     );
   }
 
   if (loading && !post) {
     return (
-      <div>
-        <div className="detailHeaderBar">
-          <Link to={backTo} className="btn btnLink">
-            ← 목록으로
-          </Link>
-        </div>
+      <div className="detailShell">
+        <Link to={backTo} className="btn btnLink">
+          ← 목록으로
+        </Link>
 
-        <h2 className="pageTitle">게시글</h2>
+        <div className="detailTitleRow">
+          <h2 className="pageTitle">게시글</h2>
+        </div>
 
         <div className="card cardPad emptyState">
           <div className="emptyTitle">불러오는 중…</div>
@@ -105,74 +102,82 @@ export default function PostDetailPage() {
 
   if (!post) {
     return (
-      <div>
-        <div className="detailHeaderBar">
-          <Link to={backTo} className="btn btnLink">
-            ← 목록으로
-          </Link>
+      <div className="detailShell">
+        <Link to={backTo} className="btn btnLink">
+          ← 목록으로
+        </Link>
+
+        <div className="detailTitleRow">
+          <h2 className="pageTitle">게시글</h2>
         </div>
 
-        <h2 className="pageTitle">게시글</h2>
-        <div className="muted">데이터가 없습니다.</div>
+        <div className="card cardPad emptyState">
+          <div className="emptyTitle">데이터가 없습니다.</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div aria-busy={deleting}>
-      <div className="detailHeaderBar">
-        <Link to={backTo} className="btn btnLink">
-          ← 목록으로
-        </Link>
+    <div className="detailShell">
+      <Link to={backTo} className="btn btnLink">
+        ← 목록으로
+      </Link>
+
+      <div className="detailTitleRow">
+        <div>
+          <div className="pageEyebrow">게시글 상세</div>
+          <h2 className="pageTitle">{post.title}</h2>
+        </div>
       </div>
 
-      <section className="detailHero card cardPad">
-        <div className="detailEyebrow">게시글 상세</div>
-        <h2 className="pageTitle detailTitle">{post.title}</h2>
-
+      <article className="card cardPad detailCard">
         <div className="detailMetaRow">
-          {post.authorName && <span className="pill">작성자 {post.authorName}</span>}
-          <span className="pill">수정 {new Date(post.updatedAt).toLocaleString("ko-KR")}</span>
+          <span className="pill">{post.authorName ?? "알 수 없음"}</span>
+          <span className="muted">
+            작성 {new Date(post.createdAt).toLocaleString()}
+          </span>
+          {post.updatedAt !== post.createdAt && (
+            <span className="muted">
+              수정 {new Date(post.updatedAt).toLocaleString()}
+            </span>
+          )}
         </div>
-      </section>
 
-      <section className="card cardPad detailBodyCard">
-        <div className="detailSectionTitle">내용</div>
-        <div className="detailContent">{post.content}</div>
-      </section>
+        <section className="detailSection">
+          <div className="detailLabel">내용</div>
+          <div className="detailContent">{post.content}</div>
+        </section>
+      </article>
 
       <div className="detailActionsOutside">
-        <div className="detailActions">
-          {canManage ? (
-            <>
-              <Link
-                to={`/posts/${postId}/edit`}
-                state={{ from: backTo }}
-                className={`btn btnPrimary ${deleting ? "isDisabled" : ""}`}
-                aria-disabled={deleting}
-                onClick={(e) => {
-                  if (deleting) e.preventDefault();
-                }}
-              >
-                수정
-              </Link>
-
-              <button className="btn btnDanger" onClick={onDelete} disabled={deleting}>
-                {deleting ? "삭제 중…" : "삭제"}
-              </button>
-            </>
-          ) : !isAuthenticated ? (
-            <Link to="/login" state={{ from: `/posts/${postId}` }} className="btn btnLink">
-              로그인
+        {canManage && (
+          <>
+            <Link
+              to={`/posts/${post.id}/edit`}
+              state={{ from: backTo }}
+              className={`btn ${deleting ? "isDisabled" : ""}`}
+              onClick={(e) => {
+                if (deleting) e.preventDefault();
+              }}
+            >
+              수정
             </Link>
-          ) : null}
 
-          <div className="spacer" />
+            <button
+              type="button"
+              className="btn"
+              onClick={onDelete}
+              disabled={deleting}
+            >
+              {deleting ? "삭제 중…" : "삭제"}
+            </button>
+          </>
+        )}
 
-          <Link to={backTo} className="btn btnLink">
-            목록으로
-          </Link>
-        </div>
+        <Link to={backTo} className="btn btnPrimary">
+          목록으로
+        </Link>
       </div>
     </div>
   );
