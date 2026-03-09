@@ -16,7 +16,7 @@ export default function PostDetailPage() {
   const location = useLocation();
   const backTo = (location.state as NavState | null)?.from ?? getLastList("/");
 
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
 
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(false);
@@ -39,9 +39,10 @@ export default function PostDetailPage() {
   }, [postId, isValidId]);
 
   const canManage = useMemo(() => {
-    if (!isAuthenticated || !user || !post) return false;
-    return user.role === "ADMIN" || user.loginId === post.authorName;
-  }, [isAuthenticated, user, post]);
+    if (!user || !post) return false;
+    if (user.role === "ADMIN") return true;
+    return !!post.authorName && user.loginId === post.authorName;
+  }, [user, post]);
 
   async function onDelete() {
     if (!post || deleting || !canManage) return;
@@ -174,10 +175,6 @@ export default function PostDetailPage() {
             </button>
           </>
         )}
-
-        <Link to={backTo} className="btn btnPrimary">
-          목록으로
-        </Link>
       </div>
     </div>
   );

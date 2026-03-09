@@ -51,7 +51,7 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
     getPost(postId)
       .then((p) => {
         const canEdit =
-          !!user && (user.role === "ADMIN" || user.loginId === p.authorName);
+          !!user && (user.role === "ADMIN" || user.loginId === p.authorLoginId);
 
         if (!canEdit) {
           nav(`/posts/${postId}`, {

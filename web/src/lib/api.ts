@@ -4,7 +4,7 @@ export type PostSummary = {
   id: number;
   title: string;
   summary: string;
-  authorName: string | null;
+  authorLoginId: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -13,7 +13,7 @@ export type Post = {
   id: number;
   title: string;
   content: string;
-  authorName: string | null;
+  authorLoginId: string | null;
   createdAt: string;
   updatedAt: string;
 };

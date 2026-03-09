@@ -44,7 +44,7 @@ public class PostController {
         Long id,
         String title,
         String content,
-        String authorName,
+        String authorLoginId,
         Instant createdAt,
         Instant updatedAt
     ) {
@@ -53,7 +53,7 @@ public class PostController {
                 p.getId(),
                 p.getTitle(),
                 p.getContent(),
-                authorNameOf(p),
+                authorLoginIdOf(p),
                 p.getCreatedAt(),
                 p.getUpdatedAt()
             );
@@ -64,7 +64,7 @@ public class PostController {
         Long id,
         String title,
         String summary,
-        String authorName,
+        String authorLoginId,
         Instant createdAt,
         Instant updatedAt
     ) {
@@ -73,7 +73,7 @@ public class PostController {
                 p.getId(),
                 p.getTitle(),
                 summarize(p.getContent()),
-                authorNameOf(p),
+                authorLoginIdOf(p),
                 p.getCreatedAt(),
                 p.getUpdatedAt()
             );
@@ -81,13 +81,11 @@ public class PostController {
 
         static String summarize(String content) {
             if (content == null) return "";
-
             String s = content
                 .replace("\r\n", "\n")
                 .replace('\r', '\n')
                 .replaceAll("\\s+", " ")
                 .trim();
-
             int limit = 120;
             if (s.length() <= limit) return s;
             return s.substring(0, limit).trim() + "…";
@@ -95,15 +93,13 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostRes> create(
+    public ResponseEntity<?> create(
         @Valid @RequestBody CreateReq req,
         Authentication authentication
     ) {
         User currentUser = getCurrentUser(authentication);
-
         Post saved = repo.save(new Post(req.title(), req.content(), currentUser));
         Long id = Objects.requireNonNull(saved.getId(), "saved.id must not be null after save");
-
         URI location = URI.create("/posts/" + id);
         return ResponseEntity.created(location).body(PostRes.from(saved));
     }
@@ -180,7 +176,7 @@ public class PostController {
         }
     }
 
-    private static String authorNameOf(Post post) {
+    private static String authorLoginIdOf(Post post) {
         User author = post.getAuthor();
         return author != null ? author.getLoginId() : null;
     }
