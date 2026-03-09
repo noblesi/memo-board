@@ -41,7 +41,7 @@ export default function PostDetailPage() {
   const canManage = useMemo(() => {
     if (!user || !post) return false;
     if (user.role === "ADMIN") return true;
-    return !!post.authorName && user.loginId === post.authorName;
+    return !!post.authorLoginId && user.loginId === post.authorLoginId;
   }, [user, post]);
 
   async function onDelete() {
@@ -134,7 +134,7 @@ export default function PostDetailPage() {
 
       <article className="card cardPad detailCard">
         <div className="detailMetaRow">
-          <span className="pill">{post.authorName ?? "알 수 없음"}</span>
+          <span className="pill">{post.authorLoginId ?? "알 수 없음"}</span>
           <span className="muted">
             작성 {new Date(post.createdAt).toLocaleString()}
           </span>

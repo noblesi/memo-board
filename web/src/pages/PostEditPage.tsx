@@ -20,7 +20,7 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
   const from = (location.state as NavState | null)?.from;
   const listBack = from ?? getLastList("/");
 
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -39,6 +39,7 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
 
   useEffect(() => {
     if (mode !== "edit") return;
+    if (authLoading) return;
 
     if (!isValidId) {
       setErr("잘못된 접근입니다.");
@@ -74,7 +75,7 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
       })
       .catch((e) => setErr(String((e as any)?.message ?? e)))
       .finally(() => setLoading(false));
-  }, [mode, postId, isValidId, nav, listBack, user]);
+  }, [mode, postId, isValidId, nav, listBack, user, authLoading]);
 
   const dirty = useMemo(() => {
     if (loading) return false;
@@ -216,6 +217,17 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
     return (
       <div className="editShell">
         <div className="error">잘못된 접근입니다.</div>
+      </div>
+    );
+  }
+
+  if (mode === "edit" && authLoading) {
+    return (
+      <div className="editShell">
+        <div className="card cardPad emptyState">
+          <div className="emptyTitle">불러오는 중…</div>
+          <div className="muted">로그인 상태를 확인하고 있습니다.</div>
+        </div>
       </div>
     );
   }
