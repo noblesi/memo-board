@@ -97,7 +97,7 @@ npm i
 npm run dev
 ```
 
-Web: http://127.0.0.1:34567
+Web: http://localhost:34567
 
 ## Config (Frontend -> Backend)
 > 프론트에서 백엔드 주소를 바꾸려면 web/.env.local에 아래를 추가하세요.
