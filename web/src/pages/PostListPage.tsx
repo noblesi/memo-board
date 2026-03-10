@@ -276,7 +276,7 @@ export default function PostListPage() {
                     </Link>
 
                     <div className="postMetaRow">
-                      {p.authorName && <span className="postAuthor">작성자 {p.authorName}</span>}
+                      {p.authorLoginId  && <span className="postAuthor">작성자 {p.authorLoginId }</span>}
                       <span className="postExcerpt">{p.summary}</span>
                     </div>
                   </div>

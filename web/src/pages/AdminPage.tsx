@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ApiError, deletePost, listPosts, type PostSummary } from "../lib/api";
 import { useAuth } from "../lib/auth";
 
@@ -30,7 +30,6 @@ function formatDateTime(iso: string) {
 }
 
 export default function AdminPage() {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [sp, setSp] = useSearchParams();
 
@@ -203,7 +202,7 @@ export default function AdminPage() {
 
                     <div className="adminRowMeta">
                       <span className="pill">ID {post.id}</span>
-                      <span className="pill">작성자 {post.authorName ?? "-"}</span>
+                      <span className="pill">작성자 {post.authorLoginId ?? "-"}</span>
                       <span className="pill">수정 {formatDateTime(post.updatedAt)}</span>
                     </div>
 

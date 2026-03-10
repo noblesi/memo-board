@@ -1149,3 +1149,65 @@ button {
     justify-content: center;
   }
 }
+
+.detailShell {
+  display: grid;
+  gap: 14px;
+}
+
+.detailInlineSection {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.detailInlineHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.detailInlineMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.detailInlineHint {
+  font-size: 13px;
+}
+
+.detailInlineList {
+  gap: 10px;
+}
+
+.detailInlineItem {
+  position: relative;
+}
+
+.detailInlineItem.isActive {
+  border-color: rgba(124, 92, 255, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(124, 92, 255, 0.18),
+    var(--shadow);
+  background:
+    linear-gradient(180deg, rgba(124, 92, 255, 0.08), rgba(124, 92, 255, 0.04)),
+    var(--cardBg);
+}
+
+.detailInlineItem.isActive:hover {
+  transform: none;
+}
+
+.detailInlineStatus {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.detailInlineEmpty,
+.detailInlineLoading {
+  margin-top: 0;
+}
