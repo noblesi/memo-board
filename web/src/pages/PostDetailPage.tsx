@@ -64,7 +64,7 @@ function formatDateTime(iso: string) {
   }).format(d);
 }
 
-function formatListTime(iso: string) {
+function formatWrittenAt(iso: string) {
   const d = new Date(iso);
   if (Number.isNaN(d.valueOf())) return iso;
 
@@ -304,39 +304,22 @@ export default function PostDetailPage() {
                   }}
                 >
                   <div className="postCardMain">
-                    <div
-                      className="row"
-                      style={{
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        flexWrap: "wrap",
+                    <Link
+                      to={`/posts/${item.id}`}
+                      state={{ from: backTo }}
+                      className="postTitleOnly"
+                      onClick={(e) => {
+                        if (active) e.preventDefault();
+                        e.stopPropagation();
                       }}
                     >
-                      <Link
-                        to={`/posts/${item.id}`}
-                        state={{ from: backTo }}
-                        className="postTitleOnly"
-                        onClick={(e) => {
-                          if (active) e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                      >
-                        {item.title}
-                      </Link>
-
-                      {active && <span className="pill detailInlineStatus">보는 중</span>}
-                    </div>
-
-                    <div className="postMetaRow">
-                      {item.authorLoginId && (
-                        <span className="postAuthor">작성자 {item.authorLoginId}</span>
-                      )}
-                      <span className="postExcerpt">{item.summary}</span>
-                    </div>
+                      {item.title}
+                    </Link>
                   </div>
 
                   <div className="postCardSide">
-                    <div className="postSideTime">{formatListTime(item.updatedAt)}</div>
+                    {item.authorLoginId && <div className="postSideAuthor">{item.authorLoginId}</div>}
+                    <div className="postSideTime">{formatWrittenAt(item.createdAt)}</div>
                   </div>
                 </article>
               );

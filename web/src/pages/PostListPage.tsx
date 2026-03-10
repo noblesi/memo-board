@@ -38,7 +38,7 @@ function normalizeSort(s: string) {
   return SORT_OPTIONS.some((o) => o.value === s) ? s : DEFAULT_SORT;
 }
 
-function formatUpdatedAt(iso: string) {
+function formatWrittenAt(iso: string) {
   const d = new Date(iso);
   if (Number.isNaN(d.valueOf())) return iso;
 
@@ -274,15 +274,11 @@ export default function PostListPage() {
                     >
                       {p.title}
                     </Link>
-
-                    <div className="postMetaRow">
-                      {p.authorLoginId  && <span className="postAuthor">작성자 {p.authorLoginId }</span>}
-                      <span className="postExcerpt">{p.summary}</span>
-                    </div>
                   </div>
 
                   <div className="postCardSide">
-                    <div className="postSideTime">{formatUpdatedAt(p.updatedAt)}</div>
+                    {p.authorLoginId && <div className="postSideAuthor">{p.authorLoginId}</div>}
+                    <div className="postSideTime">{formatWrittenAt(p.createdAt)}</div>
                   </div>
                 </article>
               );
