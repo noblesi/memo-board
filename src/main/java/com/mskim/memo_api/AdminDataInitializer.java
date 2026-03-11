@@ -11,7 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class AdminDataInitializer {
 
     @Bean
-    CommandLineRunner seedAdminUser(
+    CommandLineRunner seedUsers(
         UserRepository userRepository,
         PasswordEncoder passwordEncoder
     ) {
@@ -19,18 +19,30 @@ public class AdminDataInitializer {
             String adminLoginId = "admin";
             String adminPassword = "admin1234";
 
-            if (userRepository.existsByLoginId(adminLoginId)) {
-                return;
+            if (!userRepository.existsByLoginId(adminLoginId)) {
+                User admin = new User(
+                    adminLoginId,
+                    passwordEncoder.encode(adminPassword),
+                    UserRole.ADMIN
+                );
+
+                userRepository.save(admin);
+                System.out.println("[seed] admin user created: " + adminLoginId);
             }
 
-            User admin = new User(
-                adminLoginId,
-                passwordEncoder.encode(adminPassword),
-                UserRole.ADMIN
-            );
+            String userLoginId = "user01";
+            String userPassword = "user1234";
 
-            userRepository.save(admin);
-            System.out.println("[seed] admin user created: " + adminLoginId);
+            if (!userRepository.existsByLoginId(userLoginId)) {
+                User user = new User(
+                    userLoginId,
+                    passwordEncoder.encode(userPassword),
+                    UserRole.USER
+                );
+
+                userRepository.save(user);
+                System.out.println("[seed] normal user created: " + userLoginId);
+            }
         };
     }
 }
