@@ -2,6 +2,7 @@ package com.mskim.memo_api;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.Objects;
 
 @Entity
 @Table(name = "posts")
@@ -17,8 +18,8 @@ public class Post {
     @Column(nullable = false, length = 5000)
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
     @Column(nullable = false)
@@ -29,15 +30,10 @@ public class Post {
 
     protected Post() {}
 
-    public Post(String title, String content) {
-        this.title = title;
-        this.content = content;
-    }
-
     public Post(String title, String content, User author) {
         this.title = title;
         this.content = content;
-        this.author = author;
+        this.author = Objects.requireNonNull(author, "author must not be null");
     }
 
     @PrePersist
@@ -70,6 +66,6 @@ public class Post {
     }
 
     public void assignAuthor(User author) {
-        this.author = author;
+        this.author = Objects.requireNonNull(author, "author must not be null");
     }
 }

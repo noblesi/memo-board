@@ -1,6 +1,7 @@
 package com.mskim.memo_api.common;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -37,10 +38,15 @@ public class GlobalExceptionHandler {
         MethodArgumentNotValidException e,
         HttpServletRequest request
     ) {
-        String message = e.getBindingResult()
+        List<ApiError.FieldError> fieldErrors = e.getBindingResult()
             .getFieldErrors()
             .stream()
-            .map(this::toMessage)
+            .map(this::toFieldError)
+            .toList();
+
+        String message = fieldErrors
+            .stream()
+            .map(fe -> fe.field() + ": " + fe.message())
             .collect(Collectors.joining(", "));
 
         if (message.isBlank()) {
@@ -52,7 +58,8 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
                 message,
-                request.getRequestURI()
+                request.getRequestURI(),
+                fieldErrors
             )
         );
     }
@@ -87,11 +94,11 @@ public class GlobalExceptionHandler {
         );
     }
 
-    private String toMessage(FieldError fieldError) {
+    private ApiError.FieldError toFieldError(FieldError fieldError) {
         String defaultMessage = fieldError.getDefaultMessage();
         if (defaultMessage == null || defaultMessage.isBlank()) {
-            return fieldError.getField() + ": invalid value";
+            return new ApiError.FieldError(fieldError.getField(), "invalid value");
         }
-        return fieldError.getField() + ": " + defaultMessage;
+        return new ApiError.FieldError(fieldError.getField(), defaultMessage);
     }
 }
