@@ -1,57 +1,35 @@
 :root {
   color-scheme: light;
 
-  --bg: #f6f8fc;
-  --bgDecor1: rgba(124, 92, 255, 0.1);
-  --bgDecor2: rgba(61, 195, 255, 0.08);
-
-  --cardBg: rgba(255, 255, 255, 0.82);
-  --panel: rgba(255, 255, 255, 0.82);
-  --panel2: rgba(15, 23, 42, 0.04);
-
-  --text: rgba(15, 23, 42, 0.94);
-  --muted: rgba(15, 23, 42, 0.62);
-  --border: rgba(15, 23, 42, 0.12);
-  --borderHover: rgba(15, 23, 42, 0.22);
-
-  --primary: #5b5cff;
-  --danger: #e34b6f;
-
-  --shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
-  --radius: 18px;
-  --focus: 0 0 0 3px rgba(91, 92, 255, 0.2);
-
-  --inputBg: rgba(255, 255, 255, 0.92);
-  --btnBg: rgba(255, 255, 255, 0.86);
-  --btnBgHover: rgba(255, 255, 255, 0.98);
-
-  --pillBg: rgba(15, 23, 42, 0.05);
-
-  --dockBg: rgba(246, 248, 252, 0.58);
-  --dockCardBg: rgba(255, 255, 255, 0.72);
-  --dockCardBorder: rgba(15, 23, 42, 0.08);
-
-  --dropdownSolidBg: #ffffff;
-  --dropdownSolidBorder: rgba(15, 23, 42, 0.1);
-
-  --btnLinkHoverBg: rgba(15, 23, 42, 0.06);
-  --btnLinkHoverBorder: rgba(15, 23, 42, 0.1);
-
-  --primaryBtnBorder: rgba(91, 92, 255, 0.42);
-  --primaryBtnBg: rgba(91, 92, 255, 0.1);
-  --primaryBtnBgHover: rgba(91, 92, 255, 0.16);
-
-  --dropdownBg: #ffffff;
-  --dropdownText: #111111;
-
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
+  --bg: #f3f5f8;
+  --bg-accent: rgba(20, 83, 45, 0.06);
+  --bg-accent-2: rgba(15, 23, 42, 0.04);
+  --surface: rgba(255, 255, 255, 0.9);
+  --surface-strong: #ffffff;
+  --surface-muted: rgba(248, 250, 252, 0.92);
+  --text: #172033;
+  --muted: #5a6475;
+  --border: rgba(15, 23, 42, 0.1);
+  --border-strong: rgba(15, 23, 42, 0.18);
+  --primary: #25603d;
+  --primary-soft: rgba(37, 96, 61, 0.1);
+  --primary-soft-hover: rgba(37, 96, 61, 0.16);
+  --danger: #be3f4f;
+  --danger-soft: rgba(190, 63, 79, 0.1);
+  --shadow-sm: 0 10px 24px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 18px 48px rgba(15, 23, 42, 0.08);
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  --focus: 0 0 0 3px rgba(37, 96, 61, 0.18);
+  --font-sans:
+    "IBM Plex Sans KR",
+    "Pretendard Variable",
+    "Noto Sans KR",
     "Segoe UI",
     sans-serif;
+
+  font-family: var(--font-sans);
   line-height: 1.55;
   font-weight: 400;
   font-synthesis: none;
@@ -63,47 +41,24 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: #081126;
-  --bgDecor1: rgba(124, 92, 255, 0.18);
-  --bgDecor2: rgba(61, 195, 255, 0.14);
-
-  --cardBg: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
-  --panel: rgba(255, 255, 255, 0.06);
-  --panel2: rgba(255, 255, 255, 0.08);
-
-  --text: rgba(255, 255, 255, 0.94);
-  --muted: rgba(255, 255, 255, 0.64);
-  --border: rgba(255, 255, 255, 0.12);
-  --borderHover: rgba(255, 255, 255, 0.2);
-
-  --primary: #7c5cff;
-  --danger: #ff5c7a;
-
-  --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
-  --focus: 0 0 0 3px rgba(124, 92, 255, 0.28);
-
-  --inputBg: rgba(0, 0, 0, 0.16);
-  --btnBg: rgba(0, 0, 0, 0.18);
-  --btnBgHover: rgba(0, 0, 0, 0.24);
-
-  --pillBg: rgba(255, 255, 255, 0.06);
-
-  --dockBg: rgba(0, 0, 0, 0.34);
-  --dockCardBg: rgba(10, 15, 25, 0.58);
-  --dockCardBorder: rgba(255, 255, 255, 0.12);
-
-  --dropdownSolidBg: #0b1220;
-  --dropdownSolidBorder: rgba(255, 255, 255, 0.12);
-
-  --btnLinkHoverBg: rgba(255, 255, 255, 0.06);
-  --btnLinkHoverBorder: rgba(255, 255, 255, 0.12);
-
-  --primaryBtnBorder: rgba(124, 92, 255, 0.46);
-  --primaryBtnBg: rgba(124, 92, 255, 0.12);
-  --primaryBtnBgHover: rgba(124, 92, 255, 0.18);
-
-  --dropdownBg: #ffffff;
-  --dropdownText: #111111;
+  --bg: #0d1522;
+  --bg-accent: rgba(61, 142, 94, 0.16);
+  --bg-accent-2: rgba(148, 163, 184, 0.08);
+  --surface: rgba(17, 24, 39, 0.84);
+  --surface-strong: rgba(15, 23, 42, 0.96);
+  --surface-muted: rgba(30, 41, 59, 0.9);
+  --text: #ecf1f8;
+  --muted: #a7b0c0;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --primary: #7dd3a8;
+  --primary-soft: rgba(125, 211, 168, 0.12);
+  --primary-soft-hover: rgba(125, 211, 168, 0.18);
+  --danger: #ff8a97;
+  --danger-soft: rgba(255, 138, 151, 0.12);
+  --shadow-sm: 0 12px 28px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 20px 52px rgba(0, 0, 0, 0.34);
+  --focus: 0 0 0 3px rgba(125, 211, 168, 0.2);
 }
 
 * {
@@ -121,8 +76,8 @@ body {
   min-width: 320px;
   color: var(--text);
   background:
-    radial-gradient(900px 500px at 20% 10%, var(--bgDecor1), transparent 55%),
-    radial-gradient(900px 500px at 80% 0%, var(--bgDecor2), transparent 55%),
+    radial-gradient(800px 420px at 0% 0%, var(--bg-accent), transparent 60%),
+    radial-gradient(680px 360px at 100% 0%, var(--bg-accent-2), transparent 60%),
     var(--bg);
 }
 
@@ -132,12 +87,13 @@ a {
 }
 
 a:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
@@ -145,43 +101,53 @@ button {
   cursor: pointer;
 }
 
+#root {
+  width: 100%;
+}
+
 .appShell {
   min-height: 100vh;
-  padding: 28px 16px 48px;
+  padding: 28px 16px 56px;
 }
 
 .container {
-  max-width: 980px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding-bottom: 120px;
 }
 
-.topbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(12px);
 }
 
-.brand {
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.spacer {
-  flex: 1;
-}
-
-.pageTitle {
-  margin: 0 0 12px;
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+.cardPad {
+  padding: 18px;
 }
 
 .muted {
   color: var(--muted);
+}
+
+.pageEyebrow,
+.detailEyebrow,
+.authEyebrow {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.16;
+  font-weight: 800;
+  letter-spacing: -0.03em;
 }
 
 .row {
@@ -190,48 +156,90 @@ button {
   align-items: center;
 }
 
-.rowControls {
+.topbar {
   display: flex;
-  gap: 10px;
   align-items: center;
+  gap: 20px;
+  padding: 16px 20px;
+  margin-bottom: 22px;
+  position: sticky;
+  top: 12px;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+:root[data-theme="dark"] .topbar {
+  background: rgba(15, 23, 42, 0.82);
+}
+
+.topbarBrand {
+  display: grid;
+  gap: 2px;
+}
+
+.brand {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.topbarTagline {
+  font-size: 13px;
+}
+
+.spacer {
   flex: 1;
-  min-width: 0;
 }
 
-.card {
-  background: var(--cardBg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+.topbarActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.cardPad {
-  padding: 14px;
+.authUserMeta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.authGuestMeta {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.authRolePill {
+  font-weight: 700;
+  letter-spacing: 0.06em;
 }
 
 .input,
 .textarea,
-.select {
+.select,
+.ddBtn {
   width: 100%;
-  color: var(--text);
-  background: var(--inputBg);
+  min-height: 46px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 10px 12px;
+  background: var(--surface-strong);
+  color: var(--text);
   outline: none;
   transition:
-    border-color 0.18s,
-    box-shadow 0.18s,
-    background 0.18s;
-}
-
-.input {
-  min-height: 44px;
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease;
 }
 
 .textarea {
+  min-height: 220px;
+  padding: 14px;
   resize: vertical;
-  min-height: 180px;
 }
 
 .input::placeholder,
@@ -241,25 +249,26 @@ button {
 
 .input:focus,
 .textarea:focus,
-.select:focus {
-  border-color: rgba(124, 92, 255, 0.65);
+.select:focus,
+.ddBtn:focus {
+  border-color: var(--primary);
   box-shadow: var(--focus);
 }
 
 .input:disabled,
 .textarea:disabled,
-.select:disabled {
+.select:disabled,
+.ddBtn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
 
 .inputInvalid {
-  border-color: rgba(255, 92, 122, 0.45);
+  border-color: rgba(190, 63, 79, 0.5);
 }
 
 .inputInvalid:focus {
-  border-color: rgba(255, 92, 122, 0.6);
-  box-shadow: 0 0 0 3px rgba(255, 92, 122, 0.16);
+  box-shadow: 0 0 0 3px rgba(190, 63, 79, 0.14);
 }
 
 .btn {
@@ -267,25 +276,22 @@ button {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 42px;
-  padding: 0 14px;
-  border-radius: 14px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
-  background: var(--btnBg);
+  background: var(--surface-strong);
   color: var(--text);
-  user-select: none;
   white-space: nowrap;
   transition:
-    transform 0.08s ease,
-    background 0.18s ease,
-    border-color 0.18s ease,
-    opacity 0.18s ease;
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.08s ease;
 }
 
 .btn:hover {
-  background: var(--btnBgHover);
-  border-color: var(--borderHover);
-  text-decoration: none;
+  background: var(--surface-muted);
+  border-color: var(--border-strong);
 }
 
 .btn:active {
@@ -294,29 +300,27 @@ button {
 
 .btn:disabled {
   opacity: 0.45;
-  cursor: not-allowed;
   transform: none;
+  cursor: not-allowed;
 }
 
 .btnPrimary {
-  border-color: var(--primaryBtnBorder);
-  background: var(--primaryBtnBg);
+  background: var(--primary-soft);
+  border-color: rgba(37, 96, 61, 0.3);
   color: var(--text);
 }
 
 .btnPrimary:hover {
-  background: var(--primaryBtnBgHover);
+  background: var(--primary-soft-hover);
 }
 
 .btnDanger {
-  border-color: rgba(255, 92, 122, 0.45);
-  color: var(--text);
-  background: rgba(255, 92, 122, 0.06);
+  background: var(--danger-soft);
+  border-color: rgba(190, 63, 79, 0.28);
 }
 
 .btnDanger:hover {
-  background: rgba(255, 92, 122, 0.12);
-  border-color: rgba(255, 92, 122, 0.6);
+  border-color: rgba(190, 63, 79, 0.44);
 }
 
 .btnLink {
@@ -327,9 +331,8 @@ button {
 }
 
 .btnLink:hover {
-  background: var(--btnLinkHoverBg);
-  border-color: var(--btnLinkHoverBorder);
-  text-decoration: none;
+  background: transparent;
+  color: var(--primary);
 }
 
 .btnIcon {
@@ -338,66 +341,98 @@ button {
 }
 
 .isDisabled {
-  opacity: 0.45;
   pointer-events: none;
-}
-
-.error {
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 92, 122, 0.4);
-  background: var(--panel2);
-  color: var(--text);
-  font-size: 12px;
-}
-
-.emptyState {
-  text-align: center;
-  padding: 18px 12px;
-}
-
-.emptyTitle {
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  margin-bottom: 4px;
-}
-
-.mono {
-  font-family:
-    ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Monaco,
-    Consolas,
-    "Liberation Mono",
-    "Courier New",
-    monospace;
+  opacity: 0.45;
 }
 
 .pill {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
+  min-height: 30px;
+  padding: 0 10px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: var(--pillBg);
+  background: var(--surface-muted);
   color: var(--muted);
   font-size: 12px;
+  font-weight: 700;
+}
+
+.error {
+  border: 1px solid rgba(190, 63, 79, 0.28);
+  background: var(--danger-soft);
+  color: var(--text);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 32px 18px;
+}
+
+.emptyTitle {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
 }
 
 .fieldErrorText {
   color: var(--danger);
 }
 
-/* dropdown */
-.select {
-  color-scheme: light;
+.toastHost {
+  position: fixed;
+  right: 20px;
+  top: 18px;
+  z-index: 40;
 }
 
-.select option,
-.select optgroup {
-  background: var(--dropdownBg);
-  color: var(--dropdownText);
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 280px;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.toastSuccess {
+  border-color: rgba(37, 96, 61, 0.28);
+}
+
+.toastError {
+  border-color: rgba(190, 63, 79, 0.28);
+}
+
+.toastIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-muted);
+  font-weight: 800;
+}
+
+.toastMsg {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+}
+
+.toastClose {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
 }
 
 .dd {
@@ -406,23 +441,10 @@ button {
 }
 
 .ddBtn {
-  width: 100%;
-  min-height: 42px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 0 12px;
-  border-radius: 12px;
-  background: var(--dropdownSolidBg);
-  color: var(--text);
-  border: 1px solid var(--dropdownSolidBorder);
-  cursor: pointer;
-}
-
-.ddBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  gap: 12px;
 }
 
 .ddBtnLabel {
@@ -433,7 +455,7 @@ button {
 }
 
 .ddChevron {
-  opacity: 0.75;
+  color: var(--muted);
 }
 
 .ddMenu {
@@ -441,12 +463,12 @@ button {
   min-width: 100%;
   max-height: 260px;
   overflow: auto;
-  background: var(--dropdownSolidBg);
-  color: var(--text);
-  border: 1px solid var(--dropdownSolidBorder);
-  border-radius: 12px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
-  z-index: 100;
+  padding: 6px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-md);
+  z-index: 30;
 }
 
 .ddMenu.down {
@@ -467,276 +489,356 @@ button {
 
 .ddItem {
   width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
   text-align: left;
   padding: 10px 12px;
-  background: transparent;
-  border: 0;
-  color: inherit;
-  cursor: pointer;
+  border-radius: 10px;
 }
 
 .ddItem:hover,
 .ddItem.active {
-  background: rgba(124, 92, 255, 0.1);
+  background: var(--surface-muted);
 }
 
 .ddItem.selected {
   font-weight: 700;
 }
 
-/* list */
-.listContentPad {
-  padding-bottom: 220px;
+.boardPage,
+.detailShell,
+.editShell,
+.authShell,
+.adminShell {
+  display: grid;
+  gap: 16px;
 }
 
-.postList {
+.boardHero,
+.boardToolbar,
+.detailHeroCard,
+.editPageHero,
+.authIntroCard,
+.adminHero,
+.adminTableCard {
+  box-shadow: var(--shadow-sm);
+}
+
+.boardHero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.boardHeroMain {
+  max-width: 700px;
+}
+
+.boardTitle {
+  margin-bottom: 10px;
+}
+
+.boardIntro,
+.authIntroText,
+.editLead {
+  margin: 0;
+  max-width: 62ch;
+}
+
+.boardHeroMeta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.boardToolbar {
+  display: grid;
+  gap: 14px;
+}
+
+.boardToolbarTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+.boardToolbarBottom {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.boardSearchGroup,
+.adminSearchRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.boardSearchInput {
+  flex: 1 1 340px;
+}
+
+.boardControlGroup {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.boardFeed {
   display: grid;
   gap: 12px;
 }
 
+.postList {
+  display: grid;
+  gap: 10px;
+}
+
 .postCard {
-  cursor: pointer;
   transition:
-    transform 0.14s ease,
     border-color 0.14s ease,
+    transform 0.14s ease,
     background 0.14s ease;
 }
 
 .postCard:hover {
+  border-color: rgba(37, 96, 61, 0.28);
   transform: translateY(-1px);
-  border-color: rgba(124, 92, 255, 0.26);
 }
 
-.postCardCompact {
+.postCardFeed {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  min-height: 88px;
+  align-items: flex-start;
+  gap: 18px;
+  padding-top: 16px;
+  padding-bottom: 16px;
 }
 
 .postCardMain {
   flex: 1;
   min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.postMetaRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.postMetaLabel {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .postTitleOnly {
-  display: -webkit-box;
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  font-size: 22px;
-  font-weight: 800;
+  display: block;
+  font-size: 20px;
   line-height: 1.35;
-  color: var(--text);
-  text-decoration: none;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   word-break: break-word;
-  max-height: calc(1.35em * 2);
 }
 
-.postTitleOnly:hover {
+.postTitleOnly:hover,
+.adminRowTitle:hover,
+.brand:hover {
   text-decoration: underline;
 }
 
+.postExcerpt {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .postCardSide {
-  min-width: 128px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: center;
+  min-width: 110px;
+  display: grid;
   gap: 4px;
+  justify-items: end;
   text-align: right;
 }
 
-.postSideAuthor {
-  font-size: 13px;
+.postSideKicker {
+  color: var(--muted);
+  font-size: 11px;
   font-weight: 700;
-  color: var(--text);
-  line-height: 1.25;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .postSideTime {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  line-height: 1.25;
+  font-size: 13px;
+  font-weight: 700;
 }
 
-/* bottom dock */
-.bottomDock {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--dockBg);
-  backdrop-filter: blur(10px);
-  padding: 10px;
-  z-index: 50;
-}
-
-.bottomDockInner {
-  max-width: 980px;
-  margin: 0 auto;
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
-  background: var(--dockCardBg);
-  border: 1px solid var(--dockCardBorder);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
-}
-
-.dockSummaryRow {
+.boardPagination {
   display: flex;
-  justify-content: flex-start;
   align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-  flex-wrap: wrap;
-}
-
-.dockControlRow {
-  display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-  flex-wrap: wrap;
+  gap: 16px;
 }
 
-.dockControlGroup {
+.boardPaginationMeta {
   display: inline-flex;
+  gap: 10px;
   align-items: center;
-  gap: 8px;
   flex-wrap: wrap;
 }
 
 .dockLabel {
-  font-size: 12px;
+  font-size: 13px;
 }
 
-.dockPager {
-  display: inline-flex;
+.dockPager,
+.adminPager {
+  display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.dockPageLabel {
-  min-width: 72px;
-  text-align: center;
+.detailHeroCard,
+.detailInlineSection {
+  display: grid;
+  gap: 14px;
 }
 
-/* detail */
 .detailHeaderBar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
 }
 
 .detailHero {
-  display: grid;
-  gap: 12px;
-  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
 }
 
-.detailEyebrow {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 2px;
+.detailHeroMain {
+  flex: 1;
+  min-width: 0;
 }
 
 .detailTitle {
-  margin: 0;
-  line-height: 1.3;
+  margin-bottom: 12px;
 }
 
-.detailSectionTitle {
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 10px;
+.detailMetaRow,
+.detailInlineMeta,
+.adminHeroMeta,
+.adminRowMeta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.detailActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.detailHeroActions {
+  justify-content: flex-end;
 }
 
 .detailBodyCard {
-  margin-bottom: 14px;
+  margin: 0;
+}
+
+.detailContentCard {
+  background: var(--surface-strong);
+}
+
+.detailSectionTitle,
+.adminHeadTitle,
+.editSectionTitle {
+  font-size: 16px;
+  line-height: 1.3;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .detailContent {
   white-space: pre-wrap;
   word-break: break-word;
-  line-height: 1.85;
   font-size: 15px;
-  color: var(--text);
+  line-height: 1.9;
 }
 
-.detailActionsOutside {
-  margin-top: 8px;
+.detailInlineHint,
+.adminHeadDesc,
+.editSectionDesc {
+  font-size: 14px;
 }
 
-.detailActions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+.detailInlineItem.isActive {
+  border-color: rgba(37, 96, 61, 0.3);
+  background:
+    linear-gradient(180deg, rgba(37, 96, 61, 0.08), transparent),
+    var(--surface);
+  box-shadow: var(--shadow-md);
 }
 
-/* edit */
+.detailInlineItem.isActive:hover {
+  transform: none;
+}
+
+.editPageHero {
+  display: grid;
+  gap: 10px;
+}
+
 .editHeaderBar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
 }
 
-.editTitleRow {
+.editTitleRow,
+.authTitleRow,
+.adminHeroTop,
+.adminTableHead {
   display: flex;
-  align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
-.editEyebrow {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 6px;
-}
-
-.editPageTitle {
-  margin-bottom: 0;
-}
-
-.editShell {
+.editCard,
+.authCard {
   display: grid;
-  gap: 14px;
-  max-width: 760px;
+  gap: 18px;
 }
 
-.editCard {
+.editSection,
+.authFieldGroup {
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 
 .editSectionTop {
   display: grid;
-  gap: 4px;
-}
-
-.editSectionTitle {
-  font-size: 15px;
-  font-weight: 800;
-}
-
-.editSectionDesc {
-  font-size: 13px;
-  color: var(--muted);
+  gap: 6px;
 }
 
 .editField {
@@ -750,322 +852,55 @@ button {
 }
 
 .editTextarea {
-  min-height: 280px;
-  line-height: 1.7;
+  min-height: 300px;
 }
 
 .editFieldMeta {
   display: flex;
-  align-items: flex-start;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 12px;
   font-size: 12px;
 }
 
-.editSavingBanner {
+.editBanner {
   display: grid;
   gap: 4px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
 }
 
 .editSavingTitle {
-  font-size: 14px;
   font-weight: 800;
 }
 
-.editActions {
+.editActions,
+.authActions {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-/* responsive */
-@media (max-width: 720px) {
-  .topbar {
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .spacer {
-    display: none;
-  }
-
-  .listContentPad {
-    padding-bottom: 300px;
-  }
-
-  .postCardCompact {
-    flex-direction: row;
-    align-items: flex-start;
-    min-height: auto;
-    gap: 12px;
-  }
-
-  .postTitleOnly {
-    font-size: 20px;
-  }
-
-  .postCardSide {
-    width: auto;
-    min-width: 104px;
-    align-items: flex-end;
-    text-align: right;
-    gap: 4px;
-  }
-
-  .dockControlRow {
-    align-items: stretch;
-  }
-
-  .dockPager {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .detailActions {
-    align-items: stretch;
-  }
-
-  .detailActions .btn {
-    justify-content: center;
-  }
-
-  .detailActions .spacer {
-    display: none;
-  }
-
-  .editFieldMeta {
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .editActions {
-    align-items: stretch;
-  }
-
-  .editActions .btn {
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .appShell {
-    padding: 20px 12px 40px;
-  }
-
-  .pageTitle {
-    font-size: 20px;
-  }
-
-  .rowControls {
-    flex-wrap: wrap;
-  }
-
-  .rowControls > .input,
-  .rowControls > .select {
-    flex: 1 1 100%;
-    width: 100%;
-  }
-
-  .rowControls > .btn {
-    flex: 0 0 auto;
-  }
-
-  .rowControls > .btn.btnIcon {
-    min-width: 44px;
-    width: auto;
-    padding: 0 12px;
-  }
-}
-
-.topbarActions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.authUserMeta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.authGuestMeta {
-  min-height: 40px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 4px;
-}
-
-.authRolePill {
-  letter-spacing: 0.04em;
-  font-weight: 700;
-}
-
-.postMetaRow {
-  display: none;
-}
-
-.postAuthor {
-  display: none;
-}
-
-.postExcerpt {
-  display: none;
-}
-
-.detailShell {
-  display: grid;
-  gap: 14px;
-}
-
-.detailInlineSection {
-  display: grid;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-.detailInlineHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.detailInlineMeta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.detailInlineHint {
-  font-size: 13px;
-}
-
-.detailInlineList {
   gap: 10px;
-}
-
-.detailInlineItem {
-  position: relative;
-}
-
-.detailInlineItem.isActive {
-  border-color: rgba(124, 92, 255, 0.5);
-  box-shadow:
-    0 0 0 1px rgba(124, 92, 255, 0.18),
-    var(--shadow);
-  background:
-    linear-gradient(180deg, rgba(124, 92, 255, 0.08), rgba(124, 92, 255, 0.04)),
-    var(--cardBg);
-}
-
-.detailInlineItem.isActive:hover {
-  transform: none;
-}
-
-.detailInlineStatus {
-  color: var(--text);
-  font-weight: 700;
-}
-
-.detailInlineEmpty,
-.detailInlineLoading {
-  margin-top: 0;
-}
-
-.detailMetaRow {
-  display: flex;
-  gap: 8px;
+  align-items: center;
   flex-wrap: wrap;
-  margin-top: 8px;
 }
 
 .authShell {
-  max-width: 560px;
+  max-width: 640px;
   margin: 0 auto;
-}
-
-.authTitleRow {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.authEyebrow {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-.authPageTitle {
-  margin-bottom: 0;
-}
-
-.authCard {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.authFieldGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.authActions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
 }
 
 .authHelpRow {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
+  align-items: center;
   flex-wrap: wrap;
-  padding-top: 6px;
+  padding-top: 10px;
   border-top: 1px solid var(--border);
 }
 
 .authError {
-  margin-bottom: 12px;
-}
-
-@media (max-width: 720px) {
-  .topbarActions {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .authHelpRow,
-  .authActions {
-    align-items: stretch;
-  }
-
-  .authActions .btn,
-  .authHelpRow .btn {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-.adminShell {
-  display: grid;
-  gap: 14px;
+  margin: 0;
 }
 
 .adminHero {
@@ -1073,51 +908,13 @@ button {
   gap: 14px;
 }
 
-.adminHeroTop {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: flex-start;
-  flex-wrap: wrap;
-}
-
-.adminTitle {
-  margin-bottom: 6px;
-}
-
-.adminHeroMeta {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.adminSearchRow {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
 .adminSearchRow .input {
-  flex: 1 1 280px;
+  flex: 1 1 340px;
 }
 
 .adminTableCard {
   display: grid;
-  gap: 12px;
-}
-
-.adminTableHead {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.adminHeadTitle {
-  font-size: 15px;
-  font-weight: 800;
+  gap: 14px;
 }
 
 .adminList {
@@ -1128,11 +925,11 @@ button {
 .adminRow {
   display: flex;
   justify-content: space-between;
-  gap: 14px;
-  padding: 14px;
+  gap: 16px;
+  padding: 16px;
   border: 1px solid var(--border);
-  border-radius: 16px;
-  background: var(--panel);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
 }
 
 .adminRowMain {
@@ -1144,23 +941,16 @@ button {
 
 .adminRowTitle {
   font-size: 18px;
-  font-weight: 800;
   line-height: 1.35;
+  font-weight: 800;
   word-break: break-word;
-}
-
-.adminRowMeta {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
 }
 
 .adminRowSummary {
   color: var(--muted);
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.65;
   display: -webkit-box;
-  line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -1174,12 +964,7 @@ button {
 }
 
 .adminPager {
-  display: flex;
-  gap: 8px;
   justify-content: flex-end;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-top: 4px;
 }
 
 .adminPagerLabel {
@@ -1187,26 +972,103 @@ button {
   text-align: center;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 880px) {
+  .topbar {
+    position: static;
+  }
+
+  .boardHero,
+  .detailHero,
+  .boardPagination,
   .adminRow {
     flex-direction: column;
   }
 
+  .boardHeroMeta,
+  .detailHeroActions,
+  .adminPager {
+    justify-content: flex-start;
+  }
+
+  .postCardFeed {
+    flex-direction: column;
+  }
+
+  .postCardSide {
+    min-width: 0;
+    justify-items: start;
+    text-align: left;
+  }
+}
+
+@media (max-width: 720px) {
+  .appShell {
+    padding: 18px 12px 40px;
+  }
+
+  .pageTitle {
+    font-size: 28px;
+  }
+
+  .topbarActions,
+  .boardToolbarTop,
+  .boardToolbarBottom,
+  .editActions,
+  .authActions,
+  .authHelpRow,
   .adminRowActions {
+    align-items: stretch;
+  }
+
+  .topbarActions,
+  .boardToolbarTop,
+  .boardSearchGroup,
+  .adminSearchRow {
     width: 100%;
   }
 
-  .adminRowActions .btn {
-    flex: 1 1 auto;
+  .boardToolbarTop > .btn,
+  .boardSearchGroup > .btn,
+  .editActions > .btn,
+  .authActions > .btn,
+  .authHelpRow > .btn,
+  .adminRowActions > .btn {
+    width: 100%;
     justify-content: center;
   }
 
-  .adminPager {
-    justify-content: stretch;
+  .boardSearchInput,
+  .adminSearchRow .input {
+    flex-basis: 100%;
   }
 
-  .adminPager .btn {
-    flex: 1 1 auto;
-    justify-content: center;
+  .editFieldMeta {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 560px) {
+  .cardPad {
+    padding: 16px;
+  }
+
+  .pageTitle {
+    font-size: 24px;
+  }
+
+  .topbar {
+    padding: 14px 16px;
+  }
+
+  .toastHost {
+    left: 12px;
+    right: 12px;
+    top: 12px;
+  }
+
+  .toast {
+    min-width: 0;
+    width: 100%;
   }
 }

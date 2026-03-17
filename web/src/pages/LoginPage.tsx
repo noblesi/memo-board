@@ -33,14 +33,14 @@ export default function LoginPage() {
       loginIdMsg:
         fieldErrs.loginId ??
         (loginIdBlank
-          ? "아이디를 입력하세요."
+          ? "아이디를 입력해 주세요."
           : loginIdTooShort
             ? `아이디는 ${LOGIN_ID_MIN}자 이상이어야 합니다.`
             : ""),
       passwordMsg:
         fieldErrs.password ??
         (passwordBlank
-          ? "비밀번호를 입력하세요."
+          ? "비밀번호를 입력해 주세요."
           : passwordTooShort
             ? `비밀번호는 ${PASSWORD_MIN}자 이상이어야 합니다.`
             : ""),
@@ -59,7 +59,7 @@ export default function LoginPage() {
     setFieldErrs({});
 
     if (!ui.canSubmit) {
-      setErr("입력값을 확인해주세요.");
+      setErr("입력값을 확인해 주세요.");
       return;
     }
 
@@ -90,12 +90,17 @@ export default function LoginPage() {
 
   return (
     <div className="authShell">
-      <div className="authTitleRow">
-        <div>
-          <div className="authEyebrow">Authentication</div>
-          <h2 className="pageTitle authPageTitle">로그인</h2>
+      <section className="card cardPad authIntroCard">
+        <div className="authTitleRow">
+          <div>
+            <div className="authEyebrow">Authentication</div>
+            <h2 className="pageTitle authPageTitle">로그인</h2>
+            <p className="muted authIntroText">
+              게시글 작성과 관리 기능을 사용하려면 계정으로 로그인해야 합니다.
+            </p>
+          </div>
         </div>
-      </div>
+      </section>
 
       {err && <div className="error authError">{err}</div>}
 
@@ -107,12 +112,12 @@ export default function LoginPage() {
               className={`input ${ui.loginIdMsg ? "inputInvalid" : ""}`}
               value={loginId}
               onChange={(e) => setLoginId(e.target.value)}
-              placeholder="아이디를 입력하세요"
+              placeholder="아이디를 입력해 주세요."
               autoComplete="username"
               disabled={saving}
             />
             <span className={ui.loginIdMsg ? "fieldErrorText" : "muted"}>
-              {ui.loginIdMsg || "회원가입한 loginId를 입력하세요."}
+              {ui.loginIdMsg || "회원가입할 때 사용한 loginId를 입력합니다."}
             </span>
           </label>
 
@@ -123,7 +128,7 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="비밀번호를 입력하세요"
+              placeholder="비밀번호를 입력해 주세요."
               autoComplete="current-password"
               disabled={saving}
             />
@@ -135,7 +140,7 @@ export default function LoginPage() {
 
         <div className="authActions">
           <button className="btn btnPrimary" type="submit" disabled={!ui.canSubmit}>
-            {saving ? "로그인 중…" : "로그인"}
+            {saving ? "로그인 중..." : "로그인"}
           </button>
           <Link className={`btn btnLink ${saving ? "isDisabled" : ""}`} to="/">
             취소

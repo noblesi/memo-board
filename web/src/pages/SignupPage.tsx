@@ -4,7 +4,6 @@ import { ApiError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 
 type Flash = { type: "success" | "error"; message: string };
-
 type NavState = { from?: string; flash?: Flash };
 
 const LOGIN_ID_MIN = 4;
@@ -47,7 +46,7 @@ export default function SignupPage() {
       loginIdMsg:
         fieldErrs.loginId ??
         (loginIdBlank
-          ? "아이디를 입력하세요."
+          ? "아이디를 입력해 주세요."
           : loginIdTooShort
             ? `아이디는 ${LOGIN_ID_MIN}자 이상이어야 합니다.`
             : loginIdTooLong
@@ -56,7 +55,7 @@ export default function SignupPage() {
       passwordMsg:
         fieldErrs.password ??
         (passwordBlank
-          ? "비밀번호를 입력하세요."
+          ? "비밀번호를 입력해 주세요."
           : passwordTooShort
             ? `비밀번호는 ${PASSWORD_MIN}자 이상이어야 합니다.`
             : passwordTooLong
@@ -78,7 +77,7 @@ export default function SignupPage() {
     setFieldErrs({});
 
     if (!ui.canSubmit) {
-      setErr("입력값을 확인해주세요.");
+      setErr("입력값을 확인해 주세요.");
       return;
     }
 
@@ -91,7 +90,7 @@ export default function SignupPage() {
         state: {
           flash: {
             type: "success",
-            message: `${created.loginId} 계정이 생성되었습니다. 로그인해주세요.`,
+            message: `${created.loginId} 계정을 만들었습니다. 로그인해 주세요.`,
           },
         } satisfies NavState,
       });
@@ -112,12 +111,17 @@ export default function SignupPage() {
 
   return (
     <div className="authShell">
-      <div className="authTitleRow">
-        <div>
-          <div className="authEyebrow">Authentication</div>
-          <h2 className="pageTitle authPageTitle">회원가입</h2>
+      <section className="card cardPad authIntroCard">
+        <div className="authTitleRow">
+          <div>
+            <div className="authEyebrow">Authentication</div>
+            <h2 className="pageTitle authPageTitle">회원가입</h2>
+            <p className="muted authIntroText">
+              공부용 프로젝트에 맞게 단순하지만 정돈된 계정 생성 화면으로 구성했습니다.
+            </p>
+          </div>
         </div>
-      </div>
+      </section>
 
       {err && <div className="error authError">{err}</div>}
 
@@ -134,7 +138,7 @@ export default function SignupPage() {
               disabled={saving}
             />
             <span className={ui.loginIdMsg ? "fieldErrorText" : "muted"}>
-              {ui.loginIdMsg || "영문/숫자 조합처럼 구분 쉬운 아이디를 권장합니다."}
+              {ui.loginIdMsg || "영문과 숫자를 섞으면 구분하기 쉽습니다."}
             </span>
           </label>
 
@@ -150,7 +154,7 @@ export default function SignupPage() {
               disabled={saving}
             />
             <span className={ui.passwordMsg ? "fieldErrorText" : "muted"}>
-              {ui.passwordMsg || "개발용이라도 너무 단순한 문자열은 피하는 편이 좋습니다."}
+              {ui.passwordMsg || "너무 단순한 문자열은 피하는 편이 좋습니다."}
             </span>
           </label>
 
@@ -161,19 +165,19 @@ export default function SignupPage() {
               type="password"
               value={passwordConfirm}
               onChange={(e) => setPasswordConfirm(e.target.value)}
-              placeholder="비밀번호를 다시 입력하세요"
+              placeholder="비밀번호를 다시 입력해 주세요."
               autoComplete="new-password"
               disabled={saving}
             />
             <span className={ui.confirmMsg ? "fieldErrorText" : "muted"}>
-              {ui.confirmMsg || "확인을 위해 동일한 비밀번호를 한 번 더 입력합니다."}
+              {ui.confirmMsg || "같은 비밀번호를 한 번 더 입력합니다."}
             </span>
           </label>
         </div>
 
         <div className="authActions">
           <button className="btn btnPrimary" type="submit" disabled={!ui.canSubmit}>
-            {saving ? "가입 중…" : "회원가입"}
+            {saving ? "가입 중..." : "회원가입"}
           </button>
           <Link className={`btn btnLink ${saving ? "isDisabled" : ""}`} to="/login">
             로그인으로

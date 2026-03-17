@@ -115,7 +115,7 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
     const titleMsg =
       fieldErrs.title ??
       (titleBlank
-        ? "제목을 입력하세요."
+        ? "제목을 입력해 주세요."
         : titleTooLong
           ? `제목은 ${TITLE_MAX}자 이하여야 합니다.`
           : "");
@@ -123,9 +123,9 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
     const contentMsg =
       fieldErrs.content ??
       (contentBlank
-        ? "내용을 입력하세요."
+        ? "본문을 입력해 주세요."
         : contentTooLong
-          ? `내용은 ${CONTENT_MAX}자 이하여야 합니다.`
+          ? `본문은 ${CONTENT_MAX}자 이하여야 합니다.`
           : "");
 
     return {
@@ -148,7 +148,7 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
     setFieldErrs({});
 
     if (!ui.canSubmit) {
-      setErr("입력값을 확인해주세요.");
+      setErr("입력값을 확인해 주세요.");
       return;
     }
 
@@ -165,7 +165,7 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
         nav(`/posts/${p.id}`, {
           state: {
             from: listBack,
-            flash: { type: "success", message: "작성되었습니다." },
+            flash: { type: "success", message: "게시글을 작성했습니다." },
           } satisfies NavState,
         });
         return;
@@ -181,7 +181,7 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
       nav(`/posts/${p.id}`, {
         state: {
           from: listBack,
-          flash: { type: "success", message: "저장되었습니다." },
+          flash: { type: "success", message: "게시글을 저장했습니다." },
         } satisfies NavState,
       });
     } catch (e: unknown) {
@@ -225,7 +225,7 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
     return (
       <div className="editShell">
         <div className="card cardPad emptyState">
-          <div className="emptyTitle">불러오는 중…</div>
+          <div className="emptyTitle">불러오는 중...</div>
           <div className="muted">로그인 상태를 확인하고 있습니다.</div>
         </div>
       </div>
@@ -234,24 +234,31 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
 
   return (
     <div className="editShell">
-      <Link to={cancelTo} state={cancelState} className="btn btnLink" onClick={onCancelClick}>
-        ← {mode === "create" ? "목록으로" : "상세로"}
-      </Link>
-
-      <div className="editTitleRow">
-        <div>
-          <div className="pageEyebrow">{mode === "create" ? "Create Post" : "Edit Post"}</div>
-          <h2 className="pageTitle">{mode === "create" ? "새 글 작성" : "게시글 수정"}</h2>
+      <section className="card cardPad editPageHero">
+        <div className="editHeaderBar">
+          <Link to={cancelTo} state={cancelState} className="btn btnLink" onClick={onCancelClick}>
+            {mode === "create" ? "목록으로" : "상세로"}
+          </Link>
         </div>
 
-        {dirty && <span className="pill">미저장</span>}
-      </div>
+        <div className="editTitleRow">
+          <div>
+            <div className="pageEyebrow">{mode === "create" ? "Create Post" : "Edit Post"}</div>
+            <h2 className="pageTitle">{mode === "create" ? "새 글 작성" : "게시글 수정"}</h2>
+            <p className="muted editLead">
+              제목은 목록에서 먼저 보이고, 본문은 상세 페이지에서 그대로 읽히도록 구성됩니다.
+            </p>
+          </div>
+
+          {dirty && <span className="pill">미저장 변경</span>}
+        </div>
+      </section>
 
       {err && <div className="error">{err}</div>}
 
       {loading && mode === "edit" ? (
         <div className="card cardPad emptyState">
-          <div className="emptyTitle">불러오는 중…</div>
+          <div className="emptyTitle">불러오는 중...</div>
           <div className="muted">게시글 내용을 가져오고 있습니다.</div>
           <Link to={cancelTo} state={cancelState} className="btn btnLink">
             돌아가기
@@ -260,17 +267,17 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
       ) : (
         <form className="card cardPad editCard" onSubmit={onSubmit}>
           {saving && (
-            <div className="editBanner muted">
-              <div>{mode === "create" ? "작성 중…" : "저장 중…"}</div>
-              <div>잠시만 기다려주세요.</div>
+            <div className="editBanner">
+              <div className="editSavingTitle">{mode === "create" ? "작성 중" : "저장 중"}</div>
+              <div className="muted">잠시만 기다려 주세요.</div>
             </div>
           )}
 
           <section className="editSection">
-            <div className="editSectionHeader">
+            <div className="editSectionTop">
               <div className="editSectionTitle">기본 정보</div>
-              <div className="muted">
-                제목은 목록과 상세 페이지에서 가장 먼저 보이는 정보입니다.
+              <div className="editSectionDesc">
+                목록에서 스캔하기 쉬운 제목과 상세 페이지에서 읽기 편한 본문을 함께 정리합니다.
               </div>
             </div>
 
@@ -280,13 +287,13 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
                 className={`input ${ui.titleMsg ? "inputInvalid" : ""}`}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="예) 검색 상태가 유지되는 게시글 목록 UX 정리"
+                placeholder="예: 검색과 정렬 구조를 정리한 게시판 UI 개선"
                 maxLength={TITLE_MAX + 200}
                 disabled={saving}
               />
               <div className="editFieldMeta">
                 <span className={ui.titleMsg ? "fieldErrorText" : "muted"}>
-                  {ui.titleMsg || "한눈에 내용을 알 수 있게 작성하세요."}
+                  {ui.titleMsg || "핵심 주제가 바로 보이도록 짧고 분명한 제목이 좋습니다."}
                 </span>
                 <span className={ui.titleTooLong ? "fieldErrorText" : "muted"}>
                   {title.length}/{TITLE_MAX}
@@ -296,21 +303,18 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
 
             <label className="editField">
               <span className="editLabel">본문</span>
-              <div className="muted">
-                줄바꿈은 그대로 저장되며, 상세 페이지에서 읽기 편하게 표시됩니다.
-              </div>
               <textarea
-                className={`input textarea ${ui.contentMsg ? "inputInvalid" : ""}`}
+                className={`input textarea editTextarea ${ui.contentMsg ? "inputInvalid" : ""}`}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="내용을 입력하세요."
+                placeholder="본문을 입력해 주세요."
                 rows={14}
                 maxLength={CONTENT_MAX + 1000}
                 disabled={saving}
               />
               <div className="editFieldMeta">
                 <span className={ui.contentMsg ? "fieldErrorText" : "muted"}>
-                  {ui.contentMsg || "너무 짧은 내용보다는 핵심이 드러나게 작성하는 편이 좋습니다."}
+                  {ui.contentMsg || "단락을 나눠 쓰면 상세 페이지에서 더 읽기 쉽습니다."}
                 </span>
                 <span className={ui.contentTooLong ? "fieldErrorText" : "muted"}>
                   {content.length}/{CONTENT_MAX}
@@ -321,13 +325,7 @@ export default function PostEditPage({ mode }: { mode: "create" | "edit" }) {
 
           <div className="editActions">
             <button className="btn btnPrimary" disabled={!ui.canSubmit} type="submit">
-              {saving
-                ? mode === "create"
-                  ? "작성 중…"
-                  : "저장 중…"
-                : mode === "create"
-                  ? "작성"
-                  : "저장"}
+              {saving ? (mode === "create" ? "작성 중..." : "저장 중...") : mode === "create" ? "작성" : "저장"}
             </button>
 
             <Link

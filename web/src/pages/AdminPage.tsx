@@ -124,9 +124,11 @@ export default function AdminPage() {
       <section className="card cardPad adminHero">
         <div className="adminHeroTop">
           <div>
-            <div className="detailEyebrow">Admin</div>
+            <div className="detailEyebrow">Admin Console</div>
             <h2 className="pageTitle adminTitle">관리자 페이지</h2>
-            <div className="muted">게시글 조회와 삭제를 빠르게 처리하는 최소 관리 화면입니다.</div>
+            <div className="muted">
+              게시글 현황을 빠르게 훑고, 필요한 삭제 작업을 정돈된 흐름으로 처리하는 화면입니다.
+            </div>
           </div>
 
           <div className="adminHeroMeta">
@@ -140,7 +142,7 @@ export default function AdminPage() {
             className="input"
             value={draftQ}
             onChange={(e) => setDraftQ(e.target.value)}
-            placeholder="제목/내용 검색"
+            placeholder="제목이나 내용으로 검색"
             onKeyDown={(e) => {
               if (e.key === "Enter") setParams({ q: draftQ, page: 0 });
               if (e.key === "Escape") {
@@ -152,36 +154,39 @@ export default function AdminPage() {
           <button className="btn btnPrimary" onClick={() => setParams({ q: draftQ, page: 0 })}>
             검색
           </button>
-          <button className="btn" onClick={() => { setDraftQ(""); setParams({ q: "", page: 0 }); }}>
+          <button
+            className="btn"
+            onClick={() => {
+              setDraftQ("");
+              setParams({ q: "", page: 0 });
+            }}
+          >
             초기화
           </button>
         </div>
       </section>
 
-      {err && (
-        <div className="error" style={{ marginTop: 12 }}>
-          {err}
-        </div>
-      )}
+      {err && <div className="error">{err}</div>}
 
       <section className="card cardPad adminTableCard">
         <div className="adminTableHead">
-          <div className="adminHeadTitle">게시글 관리</div>
-          <div className="muted">
-            페이지 {Math.min(pageParam + 1, totalPages)} / {totalPages}
+          <div>
+            <div className="adminHeadTitle">게시글 관리</div>
+            <div className="muted adminHeadDesc">필터 결과를 확인하고 필요한 항목만 바로 처리합니다.</div>
           </div>
+          <div className="muted">페이지 {Math.min(pageParam + 1, totalPages)} / {totalPages}</div>
         </div>
 
         {loading ? (
           <div className="emptyState">
-            <div className="emptyTitle">불러오는 중…</div>
-            <div className="muted">관리용 게시글 목록을 가져오고 있습니다.</div>
+            <div className="emptyTitle">불러오는 중...</div>
+            <div className="muted">관리자용 게시글 목록을 가져오고 있습니다.</div>
           </div>
         ) : items.length === 0 ? (
           <div className="emptyState">
             <div className="emptyTitle">표시할 게시글이 없습니다</div>
             <div className="muted">
-              {qParam.trim() ? `“${qParam.trim()}” 검색 결과가 없습니다.` : "아직 등록된 게시글이 없습니다."}
+              {qParam.trim() ? `"${qParam.trim()}" 검색 결과가 없습니다.` : "아직 등록된 게시글이 없습니다."}
             </div>
           </div>
         ) : (
@@ -224,7 +229,7 @@ export default function AdminPage() {
                       onClick={() => onDelete(post)}
                       disabled={deletingId != null}
                     >
-                      {deleting ? "삭제 중…" : "삭제"}
+                      {deleting ? "삭제 중..." : "삭제"}
                     </button>
                   </div>
                 </article>

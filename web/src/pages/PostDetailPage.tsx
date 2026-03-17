@@ -127,6 +127,11 @@ export default function PostDetailPage() {
   }, [postId, isValidId]);
 
   useEffect(() => {
+    if (!isValidId) return;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [isValidId, postId]);
+
+  useEffect(() => {
     const params = readListParams(backTo);
 
     setListLoading(true);
@@ -170,7 +175,7 @@ export default function PostDetailPage() {
   async function onDelete() {
     if (!post || deleting || !canManage) return;
 
-    const ok = confirm("정말 삭제할까요? (되돌릴 수 없습니다)");
+    const ok = confirm("정말 삭제할까요? 이 작업은 되돌릴 수 없습니다.");
     if (!ok) return;
 
     setDeleting(true);
@@ -180,7 +185,7 @@ export default function PostDetailPage() {
       await deletePost(postId);
       nav(backTo, {
         state: {
-          flash: { type: "success", message: "삭제되었습니다." },
+          flash: { type: "success", message: "게시글을 삭제했습니다." },
         } satisfies NavState,
       });
     } catch (e: any) {
@@ -191,58 +196,76 @@ export default function PostDetailPage() {
 
   return (
     <div className="detailShell">
-      <div className="detailHero">
-        <div>
-          <div className="detailEyebrow">Post Detail</div>
-          <h2 className="pageTitle detailTitle">{post?.title ?? "게시글"}</h2>
+      <section className="card cardPad detailHeroCard">
+        <div className="detailHeaderBar">
+          <Link to={backTo} className="btn btnLink">
+            목록
+          </Link>
         </div>
 
-        {post && (
-          <div className="detailMetaRow">
-            <span className="pill">작성자 {post.authorLoginId ?? "알 수 없음"}</span>
-            <span className="pill">작성 {formatDateTime(post.createdAt)}</span>
-            {post.updatedAt !== post.createdAt && (
-              <span className="pill">수정 {formatDateTime(post.updatedAt)}</span>
+        <div className="detailHero">
+          <div className="detailHeroMain">
+            <div className="detailEyebrow">Discussion</div>
+            <h2 className="pageTitle detailTitle">{post?.title ?? "게시글"}</h2>
+
+            {post && (
+              <div className="detailMetaRow">
+                <span className="pill">작성자 {post.authorLoginId ?? "알 수 없음"}</span>
+                <span className="pill">작성 {formatDateTime(post.createdAt)}</span>
+                {post.updatedAt !== post.createdAt && (
+                  <span className="pill">수정 {formatDateTime(post.updatedAt)}</span>
+                )}
+                <span className="pill">ID {post.id}</span>
+              </div>
             )}
           </div>
-        )}
-      </div>
+
+          {post && (
+            <div className="detailActions detailHeroActions">
+              {canManage && (
+                <>
+                  <Link
+                    to={`/posts/${post.id}/edit`}
+                    state={{ from: backTo }}
+                    className={`btn ${deleting ? "isDisabled" : ""}`}
+                    onClick={(e) => {
+                      if (deleting) e.preventDefault();
+                    }}
+                  >
+                    수정
+                  </Link>
+
+                  <button
+                    type="button"
+                    className="btn btnDanger"
+                    onClick={onDelete}
+                    disabled={deleting}
+                  >
+                    {deleting ? "삭제 중..." : "삭제"}
+                  </button>
+                </>
+              )}
+
+              <Link to={backTo} className="btn">
+                목록으로
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
 
       {err && <div className="error">{err}</div>}
 
       {loading && !post ? (
         <div className="card cardPad emptyState detailBodyCard">
-          <div className="emptyTitle">불러오는 중…</div>
+          <div className="emptyTitle">불러오는 중...</div>
           <div className="muted">게시글 내용을 가져오고 있습니다.</div>
         </div>
       ) : post ? (
-        <>
-          <article className="card cardPad detailBodyCard">
-            <div className="detailSectionTitle">내용</div>
-            <div className="detailContent">{post.content}</div>
-          </article>
-
-          <div className="detailActionsOutside detailActions">
-            {canManage && (
-              <>
-                <Link
-                  to={`/posts/${post.id}/edit`}
-                  state={{ from: backTo }}
-                  className={`btn ${deleting ? "isDisabled" : ""}`}
-                  onClick={(e) => {
-                    if (deleting) e.preventDefault();
-                  }}
-                >
-                  수정
-                </Link>
-
-                <button type="button" className="btn" onClick={onDelete} disabled={deleting}>
-                  {deleting ? "삭제 중…" : "삭제"}
-                </button>
-              </>
-            )}
-          </div>
-        </>
+        <article className="card cardPad detailBodyCard detailContentCard">
+          <div className="detailSectionTitle">본문</div>
+          <div className="detailContent">{post.content}</div>
+        </article>
       ) : (
         !err && (
           <div className="card cardPad emptyState detailBodyCard">
@@ -254,21 +277,21 @@ export default function PostDetailPage() {
       <section className="detailInlineSection">
         <div className="detailInlineHeader">
           <div>
-            <div className="detailSectionTitle">아래에서 바로 다른 글 보기</div>
+            <div className="detailSectionTitle">같은 흐름의 다른 글</div>
             <div className="muted detailInlineHint">
-              상세페이지를 벗어나지 않고 같은 목록에서 다른 글로 이동할 수 있습니다.
+              현재 목록 문맥을 유지한 채 다음 글로 이동할 수 있도록 아래에 함께 배치했습니다.
             </div>
           </div>
 
           <div className="detailInlineMeta">
-            <span className="pill">총 {listLoading && !listState ? "…" : listState?.totalElements ?? 0}개</span>
+            <span className="pill">총 {listLoading && !listState ? "..." : listState?.totalElements ?? 0}개</span>
             {listState && (
               <span className="pill">
                 페이지 {Math.min(listState.page + 1, Math.max(1, listState.totalPages))} /{" "}
                 {Math.max(1, listState.totalPages)}
               </span>
             )}
-            {listState?.q && <span className="pill">검색: {listState.q}</span>}
+            {listState?.q && <span className="pill">검색어 {listState.q}</span>}
           </div>
         </div>
 
@@ -276,8 +299,8 @@ export default function PostDetailPage() {
 
         {listLoading && !listState ? (
           <div className="card cardPad emptyState detailInlineLoading">
-            <div className="emptyTitle">목록을 불러오는 중…</div>
-            <div className="muted">상세페이지 아래에 같은 목록을 붙이고 있습니다.</div>
+            <div className="emptyTitle">목록을 불러오는 중...</div>
+            <div className="muted">상세 페이지 아래에 현재 문맥의 목록을 붙이고 있습니다.</div>
           </div>
         ) : listState && listState.items.length > 0 ? (
           <div className="postList detailInlineList">
@@ -287,7 +310,7 @@ export default function PostDetailPage() {
               return (
                 <article
                   key={item.id}
-                  className={`card cardPad postCard postCardCompact detailInlineItem ${active ? "isActive" : ""}`}
+                  className={`card cardPad postCard postCardFeed detailInlineItem ${active ? "isActive" : ""}`}
                   tabIndex={0}
                   role="link"
                   aria-current={active ? "page" : undefined}
@@ -304,6 +327,12 @@ export default function PostDetailPage() {
                   }}
                 >
                   <div className="postCardMain">
+                    <div className="postMetaRow">
+                      <span className="postMetaLabel">#{item.id}</span>
+                      {item.authorLoginId && <span className="postMetaLabel">{item.authorLoginId}</span>}
+                      <span className="postMetaLabel">{formatWrittenAt(item.createdAt)}</span>
+                    </div>
+
                     <Link
                       to={`/posts/${item.id}`}
                       state={{ from: backTo }}
@@ -315,11 +344,13 @@ export default function PostDetailPage() {
                     >
                       {item.title}
                     </Link>
+
+                    {item.summary && <p className="postExcerpt">{item.summary}</p>}
                   </div>
 
                   <div className="postCardSide">
-                    {item.authorLoginId && <div className="postSideAuthor">{item.authorLoginId}</div>}
-                    <div className="postSideTime">{formatWrittenAt(item.createdAt)}</div>
+                    <div className="postSideKicker">updated</div>
+                    <div className="postSideTime">{formatWrittenAt(item.updatedAt)}</div>
                   </div>
                 </article>
               );
@@ -328,7 +359,7 @@ export default function PostDetailPage() {
         ) : (
           !listErr && (
             <div className="card cardPad emptyState detailInlineEmpty">
-              <div className="emptyTitle">같이 보여줄 목록이 없습니다.</div>
+              <div className="emptyTitle">함께 보여줄 목록이 없습니다.</div>
               <div className="muted">현재 조건에 해당하는 게시글이 없습니다.</div>
             </div>
           )
@@ -336,7 +367,7 @@ export default function PostDetailPage() {
 
         {post && listState && !hasCurrentInInlineList && !listLoading && !listErr && (
           <div className="muted detailInlineHint">
-            현재 보고 있는 글이 지금 목록 조건에는 포함되지 않아 하이라이트되지 않았습니다.
+            현재 글은 지금의 목록 조건에 포함되지 않아 아래 목록에서 강조되지 않습니다.
           </div>
         )}
       </section>
